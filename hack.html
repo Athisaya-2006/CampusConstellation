@@ -1,0 +1,2748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Constellation 🌌 — Every Student Is A Universe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --deep:#03030e; --gold:#f5c842; --violet:#a78bfa;
+  --rose:#f472b6; --cyan:#67e8f9; --white:#f0eef9;
+  --muted:#8b88aa; --green:#4ade80;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--deep);color:var(--white);
+  font-family:'Space Grotesk',sans-serif;
+  overflow-x:hidden;line-height:1.6;
+  cursor:none;
+}
+
+/* ══ CUSTOM CURSOR ══ */
+@media(pointer:fine){body{cursor:none;}}
+#cursor-wrap{
+  position:fixed;top:0;left:0;
+  pointer-events:none;z-index:9999;
+  will-change:transform;
+}
+#cur-sq{
+  position:absolute;
+  width:28px;height:28px;
+  border:1.5px solid rgba(167,139,250,.75);
+  transform:translate(-50%,-50%) rotate(45deg);
+  transition:width .18s,height .18s,border-color .18s;
+}
+#cur-dot{
+  position:absolute;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--gold);
+  transform:translate(-50%,-50%);
+  box-shadow:0 0 10px var(--gold),0 0 22px rgba(245,200,66,.5);
+  transition:transform .1s,background .15s;
+}
+#cur-h{
+  position:absolute;
+  width:14px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(167,139,250,.9),transparent);
+  transform:translate(-50%,-50%);
+  transition:width .18s;
+}
+#cur-v{
+  position:absolute;
+  width:1px;height:14px;
+  background:linear-gradient(180deg,transparent,rgba(167,139,250,.9),transparent);
+  transform:translate(-50%,-50%);
+  transition:height .18s;
+}
+#cur-trail{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;z-index:9997;
+}
+body.cur-hover #cur-sq{width:44px;height:44px;border-color:rgba(245,200,66,.85);}
+body.cur-hover #cur-dot{background:var(--rose);box-shadow:0 0 14px var(--rose);transform:translate(-50%,-50%) scale(1.6);}
+body.cur-hover #cur-h{width:22px;}
+body.cur-hover #cur-v{height:22px;}
+body.cur-click #cur-sq{width:14px;height:14px;border-color:rgba(103,232,249,1);}
+body.cur-click #cur-dot{transform:translate(-50%,-50%) scale(.4);}
+
+/* SPACE CANVAS - full fixed background */
+#space-canvas{
+  position:fixed;top:0;left:0;
+  width:100%;height:100%;
+  z-index:0;pointer-events:none;
+}
+
+/* SCROLL PROGRESS */
+#progress-bar{
+  position:fixed;top:0;left:0;height:2px;
+  background:linear-gradient(90deg,var(--violet),var(--rose),var(--gold));
+  z-index:200;transition:width .1s;
+  box-shadow:0 0 8px var(--violet);
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:.85rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(3,3,14,.75);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(167,139,250,.1);
+  transition:all .3s;
+}
+.nav-logo{
+  font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;
+  background:linear-gradient(90deg,var(--gold),var(--violet));
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  letter-spacing:.05em;cursor:pointer;flex-shrink:0;
+}
+.nav-links{display:flex;gap:1.4rem;list-style:none;}
+.nav-links a{
+  color:var(--muted);text-decoration:none;
+  font-size:.72rem;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  transition:color .3s;position:relative;cursor:pointer;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-3px;left:0;right:0;
+  height:1px;background:var(--violet);
+  transform:scaleX(0);transition:transform .3s;
+}
+.nav-links a:hover{color:var(--violet);}
+.nav-links a:hover::after{transform:scaleX(1);}
+/* Hamburger */
+#nav-toggle{
+  display:none;flex-direction:column;gap:5px;
+  background:none;border:none;cursor:pointer;padding:4px;z-index:110;
+}
+#nav-toggle span{
+  display:block;width:22px;height:2px;
+  background:var(--muted);border-radius:2px;
+  transition:all .3s;transform-origin:center;
+}
+#nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg);background:var(--violet);}
+#nav-toggle.open span:nth-child(2){opacity:0;transform:scaleX(0);}
+#nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);background:var(--violet);}
+/* Mobile nav drawer */
+@media(max-width:768px){
+  #nav-toggle{display:flex;}
+  .nav-links{
+    position:fixed;top:0;right:0;bottom:0;width:75%;max-width:280px;
+    flex-direction:column;gap:0;
+    background:rgba(8,6,22,.97);backdrop-filter:blur(30px);
+    border-left:1px solid rgba(167,139,250,.15);
+    padding:5rem 2rem 2rem;
+    transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+    z-index:105;
+  }
+  .nav-links.open{transform:translateX(0);}
+  .nav-links li{border-bottom:1px solid rgba(167,139,250,.08);}
+  .nav-links a{
+    display:block;padding:1rem 0;font-size:.85rem;color:var(--white);
+  }
+  .nav-links a::after{display:none;}
+  .nav-links a:hover{color:var(--gold);}
+}
+
+/* STORY CHAPTER INDICATOR */
+#chapter-indicator{
+  position:fixed;right:2rem;top:50%;transform:translateY(-50%);
+  z-index:100;display:flex;flex-direction:column;gap:.8rem;
+  align-items:flex-end;
+}
+.chap-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(167,139,250,.3);
+  border:1px solid rgba(167,139,250,.4);
+  transition:all .4s;cursor:pointer;
+  position:relative;
+}
+.chap-dot.active{
+  background:var(--gold);
+  box-shadow:0 0 10px var(--gold);
+  width:10px;height:10px;
+}
+.chap-dot:hover .chap-label{opacity:1;transform:translateX(0);}
+.chap-label{
+  position:absolute;right:20px;top:50%;transform:translateY(-50%) translateX(8px);
+  background:rgba(3,3,14,.9);border:1px solid rgba(167,139,250,.3);
+  color:var(--white);font-size:.7rem;font-family:'Space Mono',monospace;
+  padding:.3rem .7rem;border-radius:6px;white-space:nowrap;
+  opacity:0;transition:all .25s;pointer-events:none;
+}
+
+/* SECTIONS */
+.chapter{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:6rem 2rem;
+}
+
+/* ========= CHAPTER 1: HERO ========= */
+#ch1{
+  flex-direction:column;text-align:center;
+  padding:9rem 2rem 8rem;
+  min-height:100vh;
+  justify-content:center;
+}
+.hero-eyebrow{
+  display:inline-block;
+  font-family:'Space Mono',monospace;font-size:.68rem;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(245,200,66,.3);
+  padding:.38rem 1.1rem;border-radius:999px;
+  margin-bottom:1.6rem;
+  animation:fadeUp 1s ease both;
+  white-space:nowrap;
+}
+/* ── HERO TITLE: single line on desktop, wraps gracefully on mobile ── */
+.hero-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2rem,5.5vw,4.2rem);
+  font-weight:800;
+  line-height:1.12;
+  margin-bottom:1.4rem;
+  white-space:normal;                     /* allow wrapping on narrow or very wide screens */
+  max-width:1000px;
+  margin:0 auto 1.4rem;
+  overflow-wrap:break-word;
+  animation:fadeUp 1s ease .15s both;
+}
+/* On small screens let it wrap */
+@media(max-width:700px){
+  .hero-title{white-space:normal;font-size:clamp(1.9rem,8vw,3rem);}
+}
+.hero-title .grad-word{
+  background:linear-gradient(135deg,var(--gold) 0%,var(--rose) 50%,var(--violet) 100%);
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+/* pink highlight for specific words */
+.pink-word{
+  background:linear-gradient(90deg,var(--rose),#ff94c7);
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+/* Remove old .line2 block style */
+.hero-title .line2{
+  display:inline;
+}
+.hero-sub{
+  font-size:1rem;color:var(--muted);max-width:520px;
+  margin:0 auto 2.2rem;line-height:1.7;
+  animation:fadeUp 1s ease .3s both;
+}
+.hero-sub em{color:var(--violet);font-style:normal;font-weight:600;}
+.hero-cta{
+  display:flex;gap:.9rem;justify-content:center;
+  flex-wrap:wrap;align-items:center;
+  animation:fadeUp 1s ease .45s both;
+  margin-bottom:3rem;
+}
+.btn-p{
+  background:linear-gradient(135deg,var(--violet),var(--rose));
+  color:#fff;border:none;padding:.85rem 2rem;border-radius:999px;
+  font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.88rem;
+  cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;
+  box-shadow:0 0 28px rgba(167,139,250,.35);
+  transition:transform .2s,box-shadow .3s;
+  line-height:1;
+}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 0 48px rgba(167,139,250,.55);}
+/* Ghost button — explicit dark bg so it never looks white */
+.btn-g{
+  background:rgba(255,255,255,.06);
+  color:var(--white);
+  border:1px solid rgba(255,255,255,.22);
+  padding:.85rem 2rem;border-radius:999px;
+  font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:500;
+  text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;
+  transition:border-color .3s,background .3s,color .3s;
+  line-height:1;
+}
+.btn-g:hover{
+  border-color:var(--violet);
+  background:rgba(167,139,250,.12);
+  color:var(--white);
+}
+
+/* ── Scroll hint ── sits below CTA, not absolute-overlapping */
+.scroll-hint{
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  color:var(--muted);font-size:.66rem;
+  font-family:'Space Mono',monospace;letter-spacing:.18em;
+  cursor:pointer;opacity:.7;
+  animation:fadeUp 1.2s ease 1s both;
+}
+.scroll-arrow{
+  width:20px;height:20px;
+  border-right:1px solid rgba(167,139,250,.55);
+  border-bottom:1px solid rgba(167,139,250,.55);
+  transform:rotate(45deg);
+  animation:bounce 1.6s ease-in-out infinite;
+}
+@keyframes bounce{
+  0%,100%{transform:rotate(45deg) translateY(0);}
+  50%{transform:rotate(45deg) translateY(6px);}
+}
+
+/* ========= STORY WIPE TRANSITION ========= */
+.story-divider{
+  position:relative;z-index:1;
+  padding:4rem 2rem;text-align:center;
+}
+.story-text{
+  font-family:'Syne',sans-serif;font-size:clamp(1.4rem,3vw,2.2rem);
+  font-weight:700;color:rgba(240,238,249,.15);
+  max-width:800px;margin:0 auto;line-height:1.5;
+  transition:color 1s;
+}
+.story-text.lit{color:var(--white);}
+.story-text .accent{color:var(--gold);}
+.story-text .violet{color:var(--violet);}
+.story-text .rose{color:var(--rose);}
+
+/* ========= CHAPTER 2: THE JOURNEY BEGINS ========= */
+#ch2{padding:8rem 2rem;}
+.journey-grid{
+  max-width:1100px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;
+}
+.journey-visual{
+  position:relative;width:100%;aspect-ratio:1;max-width:420px;
+}
+/* Planet */
+.planet{
+  width:100%;height:100%;border-radius:50%;
+  background:radial-gradient(ellipse at 32% 28%,#2a1060 0%,#0d0830 50%,#060414 100%);
+  border:1px solid rgba(167,139,250,.25);
+  position:relative;overflow:hidden;
+  box-shadow:0 0 60px rgba(167,139,250,.15),inset 0 0 80px rgba(167,139,250,.05);
+  animation:planetFloat 8s ease-in-out infinite;
+}
+@keyframes planetFloat{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-14px) rotate(2deg);}}
+
+.planet-ring{
+  position:absolute;width:140%;height:28%;
+  border-radius:50%;border:1px solid rgba(167,139,250,.25);
+  top:36%;left:-20%;
+  transform:rotateX(70deg);
+  box-shadow:0 0 20px rgba(167,139,250,.1);
+}
+.planet-spots{position:absolute;inset:0;}
+.planet-label{
+  position:absolute;inset:0;display:flex;
+  align-items:center;justify-content:center;
+  flex-direction:column;gap:.5rem;
+  font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;
+  color:rgba(240,238,249,.9);text-align:center;
+  text-shadow:0 0 20px rgba(167,139,250,.5);
+}
+.orbit-dot{
+  position:absolute;border-radius:50%;
+}
+
+/* Content text */
+.chapter-tag{
+  display:inline-block;
+  font-family:'Space Mono',monospace;font-size:.68rem;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(245,200,66,.2);
+  padding:.25rem .8rem;border-radius:999px;margin-bottom:1rem;
+}
+.ch-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;
+  margin-bottom:1rem;line-height:1.15;
+}
+.ch-body{color:var(--muted);font-size:.95rem;margin-bottom:.9rem;}
+.ch-body strong{color:var(--violet);font-weight:600;}
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1rem;margin-top:1.8rem;
+}
+.stat-c{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(167,139,250,.18);
+  border-radius:12px;padding:1rem;text-align:center;
+  transition:border-color .3s,transform .3s;cursor:default;
+}
+.stat-c:hover{border-color:rgba(167,139,250,.4);transform:translateY(-4px);}
+.stat-n{
+  font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--violet));
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.stat-l{font-size:.72rem;color:var(--muted);margin-top:.2rem;}
+
+/* ========= CHAPTER 3: FLOATING ISLANDS ========= */
+#ch3{padding:8rem 2rem;display:block;}
+.islands-wrap{max-width:1100px;margin:0 auto;}
+.islands-header{text-align:center;margin-bottom:4rem;}
+.islands-canvas-wrap{
+  position:relative;
+  min-height:600px;
+}
+/* Islands rendered on a canvas overlay + HTML cards positioned absolutely */
+#islands-canvas{
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;
+}
+.islands-grid2{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;
+  position:relative;z-index:2;
+}
+.isle{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(167,139,250,.18);
+  border-radius:20px;padding:1.8rem;
+  position:relative;overflow:hidden;
+  transition:transform .4s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .4s,border-color .4s;
+  cursor:default;
+}
+.isle::before{
+  content:'';position:absolute;top:-50px;right:-50px;
+  width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,var(--isle-g,rgba(167,139,250,.15)),transparent 70%);
+  pointer-events:none;
+}
+.isle:hover{
+  transform:translateY(-10px) rotate(-1deg);
+  box-shadow:0 24px 60px rgba(167,139,250,.2);
+  border-color:rgba(167,139,250,.45);
+}
+.isle-icon{font-size:2.4rem;margin-bottom:1rem;display:block;
+  animation:floatIcon 3s ease-in-out infinite;
+}
+@keyframes floatIcon{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.isle-title{
+  font-family:'Syne',sans-serif;font-size:1.05rem;
+  font-weight:700;color:var(--white);margin-bottom:.5rem;
+}
+.isle-desc{font-size:.83rem;color:var(--muted);line-height:1.6;}
+.isle-tag{
+  display:inline-block;margin-top:.9rem;
+  font-size:.65rem;font-family:'Space Mono',monospace;
+  letter-spacing:.1em;color:var(--gold);
+  border:1px solid rgba(245,200,66,.2);
+  padding:.2rem .65rem;border-radius:999px;
+}
+
+/* ========= CHAPTER 4: POSTER ========= */
+#ch4{padding:8rem 2rem;display:block;}
+.poster-wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+.poster-frame{
+  background:linear-gradient(160deg,#1a0a2e,#0a1628,#0d2818);
+  border-radius:20px;border:1px solid rgba(167,139,250,.3);
+  padding:3rem 2.5rem;text-align:center;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 80px rgba(167,139,250,.12);
+}
+.poster-frame::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,rgba(167,139,250,.15),transparent 60%),
+             radial-gradient(ellipse at 0% 100%,rgba(103,232,249,.08),transparent 60%);
+  pointer-events:none;
+}
+.poster-student{
+  font-size:5rem;display:block;
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-14px);}}
+.poster-main-title{
+  font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),var(--rose));
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  margin-bottom:.4rem;
+}
+.poster-sub{
+  font-family:'Space Mono',monospace;font-size:.72rem;
+  letter-spacing:.15em;color:var(--cyan);margin-bottom:1.5rem;text-transform:uppercase;
+}
+.poster-quote{
+  font-size:.92rem;color:var(--white);font-style:italic;
+  max-width:300px;margin:0 auto 1.5rem;line-height:1.8;opacity:.9;
+}
+.issues-row2{
+  display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-top:1.2rem;
+}
+.i-badge{
+  font-size:.68rem;font-family:'Space Mono',monospace;
+  color:var(--rose);border:1px solid rgba(244,114,182,.3);
+  padding:.25rem .65rem;border-radius:999px;
+  background:rgba(244,114,182,.05);
+  transition:background .2s,transform .2s;cursor:default;
+}
+.i-badge:hover{background:rgba(244,114,182,.12);transform:scale(1.05);}
+
+.poster-info{padding:.5rem 0;}
+.poster-info h2{
+  font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;
+  margin-bottom:1rem;line-height:1.2;
+}
+.prompt-reveal{
+  background:rgba(167,139,250,.06);
+  border:1px solid rgba(167,139,250,.2);
+  border-left:3px solid var(--violet);
+  border-radius:8px;padding:1rem 1.2rem;
+  font-family:'Space Mono',monospace;font-size:.75rem;
+  color:var(--muted);line-height:1.8;margin-top:1.2rem;
+}
+.prompt-reveal strong{color:var(--gold);}
+
+/* ========= CHAPTER 5: MUSIC ========= */
+#ch5{padding:8rem 2rem;display:block;}
+.music-wrap{max-width:600px;margin:0 auto;text-align:center;}
+.vinyl-wrap{
+  position:relative;width:180px;height:180px;margin:0 auto 2rem;
+}
+.vinyl{
+  width:180px;height:180px;border-radius:50%;
+  background:conic-gradient(from 0deg,#1a0a2e 0deg,#0d0d2b 40deg,rgba(167,139,250,.2) 80deg,#1a0a2e 120deg,#0d0d2b 200deg,rgba(245,200,66,.15) 260deg,#1a0a2e 360deg);
+  border:3px solid rgba(167,139,250,.3);
+  position:absolute;top:0;left:0;
+  animation:spinVinyl 8s linear infinite paused;
+}
+.vinyl.playing{animation-play-state:running;}
+.vinyl::after{
+  content:'';position:absolute;width:36px;height:36px;border-radius:50%;
+  background:var(--deep);border:2px solid rgba(167,139,250,.4);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+}
+/* Vinyl groove lines */
+.vinyl-grooves{
+  position:absolute;top:0;left:0;width:180px;height:180px;
+  border-radius:50%;pointer-events:none;
+  animation:spinVinyl 8s linear infinite paused;
+}
+.vinyl-grooves.playing{animation-play-state:running;}
+@keyframes spinVinyl{to{transform:rotate(360deg);}}
+
+.vinyl-glow{
+  position:absolute;inset:-20px;border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,.2) 0%,transparent 70%);
+  animation:glowPulse 2s ease-in-out infinite paused;
+  pointer-events:none;
+}
+.vinyl-glow.playing{animation-play-state:running;}
+@keyframes glowPulse{0%,100%{opacity:.6;transform:scale(1);}50%{opacity:1;transform:scale(1.08);}}
+
+.player-card{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(167,139,250,.2);
+  border-radius:24px;padding:2.5rem;
+  position:relative;overflow:hidden;
+}
+.player-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% -10%,rgba(167,139,250,.12),transparent 55%);
+  pointer-events:none;
+}
+.track-name{
+  font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;
+  color:var(--white);margin-bottom:.2rem;
+}
+.track-art{font-size:.82rem;color:var(--muted);margin-bottom:1.5rem;}
+.lyrics-box{
+  background:rgba(167,139,250,.04);border:1px solid rgba(167,139,250,.1);
+  border-radius:10px;padding:.9rem;font-size:.78rem;color:var(--muted);
+  font-style:italic;line-height:1.9;max-height:110px;overflow-y:auto;
+  text-align:left;margin-bottom:1.4rem;scroll-behavior:smooth;
+}
+.lyrics-box .hl{color:var(--violet);font-weight:600;font-style:normal;}
+.lyrics-box .bl{color:var(--rose);font-style:normal;}
+.prog-wrap{margin-bottom:1.4rem;}
+.prog-bar{
+  width:100%;height:4px;background:rgba(255,255,255,.08);
+  border-radius:999px;overflow:hidden;margin-bottom:.4rem;
+  cursor:pointer;
+}
+.prog-fill{
+  height:100%;background:linear-gradient(90deg,var(--violet),var(--rose));
+  border-radius:999px;width:0%;transition:width .5s linear;
+}
+.time-row{
+  display:flex;justify-content:space-between;
+  font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted);
+}
+.ctrl-row{
+  display:flex;align-items:center;justify-content:center;gap:1.5rem;
+}
+.ctrl-btn{
+  background:transparent;border:none;color:var(--muted);
+  cursor:pointer;font-size:1.1rem;padding:.5rem;
+  transition:color .2s,transform .2s;
+}
+.ctrl-btn:hover{color:var(--white);transform:scale(1.15);}
+.play-btn{
+  width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,var(--violet),var(--rose));
+  border:none;color:#fff;font-size:1.3rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s,box-shadow .3s;
+  box-shadow:0 0 28px rgba(167,139,250,.4);
+}
+.play-btn:hover{transform:scale(1.1);box-shadow:0 0 50px rgba(167,139,250,.6);}
+.lyria-note{
+  margin-top:1.4rem;font-size:.75rem;color:var(--muted);
+  background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.15);
+  border-radius:8px;padding:.8rem 1rem;text-align:left;line-height:1.6;
+}
+.lyria-note strong{color:var(--gold);}
+
+/* ========= CHAPTER 6: CAMPUS BEEFS ========= */
+#ch6{padding:8rem 2rem;display:block;}
+.beefs-wrap{max-width:1100px;margin:0 auto;}
+.beefs-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1.2rem;
+}
+.beef{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(167,139,250,.15);
+  border-radius:16px;padding:1.4rem;
+  transition:transform .3s,box-shadow .3s,border-color .3s;
+  cursor:default;
+}
+.beef:hover{
+  transform:translateY(-5px);
+  box-shadow:0 16px 50px rgba(167,139,250,.12);
+  border-color:rgba(167,139,250,.35);
+}
+.beef-icon2{font-size:1.8rem;margin-bottom:.6rem;display:block;}
+.beef-title2{
+  font-family:'Syne',sans-serif;font-size:.95rem;
+  font-weight:700;color:var(--white);margin-bottom:.4rem;
+}
+.beef-desc2{font-size:.8rem;color:var(--muted);line-height:1.6;}
+.vote-r{display:flex;align-items:center;gap:.5rem;margin-top:.9rem;}
+.vote-b{
+  background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.18);
+  border-radius:999px;color:var(--violet);font-size:.7rem;
+  font-family:'Space Mono',monospace;padding:.28rem .75rem;
+  cursor:pointer;transition:background .2s,border-color .2s,transform .15s;
+}
+.vote-b:hover{background:rgba(167,139,250,.15);transform:scale(1.05);}
+.vote-b.voted{
+  background:rgba(245,200,66,.1);border-color:var(--gold);color:var(--gold);
+}
+.vote-cnt{font-size:.7rem;color:var(--muted);}
+
+/* ========= CHAPTER 7: TEAM ========= */
+#ch7{padding:8rem 2rem;display:block;}
+.team-wrap{max-width:1000px;margin:0 auto;text-align:center;}
+.team-grid2{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1.2rem;margin-top:3rem;
+}
+.tm{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(167,139,250,.15);
+  border-radius:20px;padding:1.8rem 1rem;
+  text-align:center;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .3s;
+  cursor:default;
+}
+.tm:hover{transform:translateY(-8px) scale(1.03);border-color:rgba(167,139,250,.4);}
+.tm-av{
+  width:64px;height:64px;border-radius:50%;
+  margin:0 auto 1rem;display:flex;align-items:center;
+  justify-content:center;font-size:1.6rem;
+  border:2px solid rgba(167,139,250,.3);
+  background:rgba(167,139,250,.07);position:relative;
+}
+.tm-av::after{
+  content:'';position:absolute;inset:-5px;border-radius:50%;
+  border:1px solid rgba(245,200,66,.18);
+}
+.tm-name{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--white);margin-bottom:.2rem;}
+.tm-role{font-size:.68rem;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:.05em;margin-bottom:.4rem;}
+.tm-quote{font-size:.72rem;color:var(--muted);font-style:italic;}
+
+/* ========= CHAPTER 8: FINALE / CONTACT ========= */
+#ch8{padding:8rem 2rem 4rem;display:block;text-align:center;}
+.finale-wrap{max-width:700px;margin:0 auto;}
+.finale-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;
+  margin-bottom:1rem;line-height:1.1;
+}
+.finale-title span{
+  background:linear-gradient(135deg,var(--gold),var(--rose),var(--violet));
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.finale-sub{color:var(--muted);max-width:460px;margin:0 auto 2.5rem;font-size:.95rem;}
+.contact-links{
+  display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:4rem;
+}
+.c-link{
+  display:flex;align-items:center;gap:.5rem;color:var(--muted);
+  text-decoration:none;font-size:.82rem;
+  border:1px solid rgba(255,255,255,.1);
+  padding:.6rem 1.2rem;border-radius:999px;
+  transition:color .2s,border-color .2s,transform .2s;cursor:pointer;
+}
+.c-link:hover{color:var(--violet);border-color:rgba(167,139,250,.4);transform:translateY(-2px);}
+
+footer{
+  border-top:1px solid rgba(167,139,250,.1);
+  padding:2rem;display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:1rem;
+  font-size:.78rem;color:var(--muted);
+}
+.f-logo{
+  font-family:'Syne',sans-serif;font-weight:800;
+  background:linear-gradient(90deg,var(--gold),var(--violet));
+  background-clip:text;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+/* GLOBAL ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(28px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .8s ease,transform .8s ease;}
+.reveal.vis{opacity:1;transform:none;}
+.reveal-d1{transition-delay:.1s;}
+.reveal-d2{transition-delay:.2s;}
+.reveal-d3{transition-delay:.3s;}
+.reveal-d4{transition-delay:.4s;}
+
+/* DIVIDER */
+.div-line{
+  max-width:120px;margin:0 auto 5rem;
+  display:flex;align-items:center;gap:.8rem;
+}
+.div-line::before,.div-line::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(167,139,250,.4));
+}
+.div-line::after{background:linear-gradient(90deg,rgba(167,139,250,.4),transparent);}
+.div-line span{color:var(--gold);font-size:1rem;}
+
+/* ===== INTERACTIVE CONSTELLATION DRAW ===== */
+#constellation-draw{
+  position:relative;z-index:1;
+  padding:6rem 2rem;text-align:center;
+}
+#const-canvas{
+  display:block;margin:2rem auto 0;
+  border-radius:20px;cursor:crosshair;
+  border:1px solid rgba(167,139,250,.15);
+  background:rgba(255,255,255,.02);
+}
+
+/* WARP SPEED BUTTON */
+#warp-btn{
+  position:fixed;bottom:2rem;right:2rem;z-index:200;
+  background:rgba(3,3,14,.8);border:1px solid rgba(167,139,250,.3);
+  color:var(--violet);font-family:'Space Mono',monospace;font-size:.68rem;
+  letter-spacing:.1em;padding:.5rem 1rem;border-radius:999px;
+  cursor:pointer;transition:all .3s;backdrop-filter:blur(10px);
+}
+#warp-btn:hover{background:rgba(167,139,250,.1);border-color:var(--violet);color:var(--white);}
+#warp-btn.active{color:var(--gold);border-color:var(--gold);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--deep);}
+::-webkit-scrollbar-thumb{background:rgba(167,139,250,.3);border-radius:3px;}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:900px){
+  .journey-grid,.poster-wrap{grid-template-columns:1fr;}
+  .journey-visual{display:none;}
+  .islands-grid2{grid-template-columns:repeat(2,1fr);}
+  .beefs-grid{grid-template-columns:repeat(2,1fr);}
+  .team-grid2{grid-template-columns:repeat(2,1fr);}
+  #chapter-indicator{display:none;}
+  #warp-btn{bottom:1rem;right:1rem;font-size:.62rem;padding:.4rem .8rem;}
+}
+@media(max-width:600px){
+  .chapter{padding:5rem 1.2rem 3rem;}
+  .hero-title{font-size:2.4rem!important;}
+  .hero-sub{font-size:.92rem;}
+  .hero-cta{flex-direction:column;align-items:center;}
+  .btn-p,.btn-g{width:100%;max-width:260px;text-align:center;}
+  .islands-grid2,.beefs-grid{grid-template-columns:1fr;}
+  .team-grid2{grid-template-columns:repeat(2,1fr);}
+  .ch-title{font-size:1.6rem!important;}
+  .stats-row{grid-template-columns:repeat(3,1fr);}
+  .story-text{font-size:1rem!important;}
+  .section-title,.finale-title{font-size:1.8rem!important;}
+  #forge-toolbar{gap:.4rem;}
+  .forge-tool{padding:.35rem .6rem;font-size:.62rem;}
+  .forge-action{font-size:.62rem;padding:.35rem .75rem;}
+  .div-line{margin-bottom:2.5rem;}
+  footer{flex-direction:column;text-align:center;gap:.5rem;}
+  .contact-links{flex-direction:column;align-items:center;}
+  .c-link{width:100%;max-width:220px;justify-content:center;}
+  #warp-btn{display:none;}
+  .poster-frame{padding:2rem 1.5rem;}
+  .player-card{padding:1.8rem 1.2rem;}
+  .music-wrap{padding:0 .5rem;}
+}
+@media(max-width:400px){
+  .team-grid2{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:1fr;}
+  .hero-title{font-size:2rem!important;}
+}
+/* Touch devices — disable custom cursor */
+@media(pointer:coarse){
+  #cursor-wrap,#cur-trail{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- CUSTOM CURSOR (desktop only) -->
+<div id="cursor-wrap">
+  <canvas id="cur-trail"></canvas>
+  <div id="cur-sq"></div>
+  <div id="cur-dot"></div>
+  <div id="cur-h"></div>
+  <div id="cur-v"></div>
+</div>
+
+<!-- SCROLL PROGRESS -->
+<div id="progress-bar" style="width:0%"></div>
+
+<!-- WARP SPEED TOGGLE -->
+<button id="warp-btn" onclick="toggleWarp()">🚀 WARP SPEED</button>
+
+<!-- SPACE CANVAS -->
+<canvas id="space-canvas"></canvas>
+
+<!-- NAV -->
+<nav id="navbar">
+  <span class="nav-logo" onclick="scrollTo({top:0,behavior:'smooth'})">✦ Campus Constellation</span>
+  <button id="nav-toggle" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="nav-links">
+    <li><a onclick="scrollToChap('ch1');closeNav()">Launch</a></li>
+    <li><a onclick="scrollToChap('ch2');closeNav()">Origin</a></li>
+    <li><a onclick="scrollToChap('ch3');closeNav()">Islands</a></li>
+    <li><a onclick="scrollToChap('ch4');closeNav()">Poster</a></li>
+    <li><a onclick="scrollToChap('ch5');closeNav()">Anthem</a></li>
+    <li><a onclick="scrollToChap('ch6');closeNav()">Beefs</a></li>
+    <li><a onclick="scrollToChap('ch7');closeNav()">Stars</a></li>
+    <li><a onclick="scrollToChap('ch8');closeNav()">Connect</a></li>
+  </ul>
+</nav>
+
+<!-- CHAPTER DOTS -->
+<div id="chapter-indicator">
+  <div class="chap-dot active" onclick="scrollToChap('ch1')"><span class="chap-label">Launch</span></div>
+  <div class="chap-dot" onclick="scrollToChap('ch2')"><span class="chap-label">Origin Story</span></div>
+  <div class="chap-dot" onclick="scrollToChap('ch3')"><span class="chap-label">7 Islands</span></div>
+  <div class="chap-dot" onclick="scrollToChap('ch4')"><span class="chap-label">Poster</span></div>
+  <div class="chap-dot" onclick="scrollToChap('ch5')"><span class="chap-label">Anthem</span></div>
+  <div class="chap-dot" onclick="scrollToChap('ch6')"><span class="chap-label">Campus Beefs</span></div>
+  <div class="chap-dot" onclick="scrollToChap('ch7')"><span class="chap-label">The Team</span></div>
+  <div class="chap-dot" onclick="scrollToChap('ch8')"><span class="chap-label">Connect</span></div>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 1: LAUNCH             -->
+<!-- ============================= -->
+<section class="chapter" id="ch1">
+  <div class="hero-content" style="max-width:900px;position:relative;z-index:2;width:100%;">
+    <span class="hero-eyebrow">✦ Class of Infinity · Campus Constellation 2025 ✦</span>
+    <h1 class="hero-title">
+      Every Student Is A <span class="pink-word">Universe</span>
+    </h1>
+    <p class="hero-sub">
+      <em>Campus Constellation</em> transforms the chaos of student life into a breathtaking cosmic journey — where every memory becomes a star, and every experience forms a constellation that shines forever.
+    </p>
+    <div class="hero-cta">
+      <button class="btn-p" onclick="scrollToChap('ch2')">Begin the Journey ✦</button>
+      <button class="btn-g" onclick="scrollToChap('ch5')">Hear the Anthem</button>
+    </div>
+    <div class="scroll-hint" onclick="scrollToChap('ch2')">
+      SCROLL TO EXPLORE
+      <div class="scroll-arrow"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY DIVIDER 1 -->
+<div class="story-divider" id="sd1">
+  <p class="story-text" id="st1">
+    Every year, <span class="accent">thousands of students</span> enter a campus.<br>
+    They arrive as <span class="violet">blank pages</span> — curious, nervous, full of possibility.<br>
+    What they don't know yet is that they are about to become <span class="rose">stars</span>.
+  </p>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 2: ORIGIN STORY       -->
+<!-- ============================= -->
+<section class="chapter" id="ch2" style="display:block;padding:8rem 2rem;">
+  <div class="journey-grid">
+    <div class="journey-visual reveal">
+      <div class="planet" id="planet">
+        <div class="planet-ring"></div>
+        <div class="planet-spots" id="planet-spots"></div>
+        <div class="planet-label">
+          <span style="font-size:2.5rem;">🌌</span>
+          <span>Campus<br>Constellation</span>
+        </div>
+      </div>
+      <div class="orbit-dot" id="od1" style="width:10px;height:10px;background:var(--gold);box-shadow:0 0 12px var(--gold);"></div>
+      <div class="orbit-dot" id="od2" style="width:7px;height:7px;background:var(--rose);box-shadow:0 0 10px var(--rose);"></div>
+      <div class="orbit-dot" id="od3" style="width:6px;height:6px;background:var(--cyan);box-shadow:0 0 8px var(--cyan);"></div>
+    </div>
+    <div class="journey-text">
+      <span class="chapter-tag reveal">Chapter 01 · Origin</span>
+      <h2 class="ch-title reveal reveal-d1">Connecting Chaos<br>Into Eternal Stars</h2>
+      <p class="ch-body reveal reveal-d2">
+        Campus Constellation is an <strong>immersive storytelling experience</strong> that transforms the everyday journey of student life into a breathtaking cosmic universe.
+      </p>
+      <p class="ch-body reveal reveal-d2">
+        Every assignment, every late-night coding session, every hackathon victory — even every setback — becomes a <strong>glowing star</strong> in your personal constellation.
+      </p>
+      <p class="ch-body reveal reveal-d3">
+        The <strong>floating islands</strong> represent different chapters of campus life — learning, innovation, friendships, and growth. As you journey through, isolated memories connect through <strong>radiant constellation lines</strong>.
+      </p>
+      <div class="stats-row reveal reveal-d3">
+        <div class="stat-c"><div class="stat-n" id="cnt1">0</div><div class="stat-l">Stars Formed</div></div>
+        <div class="stat-c"><div class="stat-n">7</div><div class="stat-l">Campus Islands</div></div>
+        <div class="stat-c"><div class="stat-n">∞</div><div class="stat-l">Possibilities</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY DIVIDER 2 -->
+<div class="story-divider" id="sd2">
+  <p class="story-text" id="st2">
+    Campus life is not one story.<br>
+    It is <span class="accent">seven</span> — each a different island, each a different universe.<br>
+    <span class="violet">Which one calls to you?</span>
+  </p>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 3: FLOATING ISLANDS   -->
+<!-- ============================= -->
+<section id="ch3" class="chapter" style="display:block;padding:8rem 2rem;">
+  <div class="islands-wrap">
+    <div class="islands-header">
+      <div class="div-line"><span>✦</span></div>
+      <span class="chapter-tag reveal">Chapter 02 · The Seven Islands</span>
+      <h2 class="ch-title reveal reveal-d1" style="text-align:center;margin-bottom:.5rem;">Chapters of Your<br>Campus Journey</h2>
+      <p style="color:var(--muted);text-align:center;max-width:500px;margin:0 auto 3rem;font-size:.9rem;" class="reveal reveal-d2">Each floating island is a dimension of student life. Hover to explore — click to go deeper.</p>
+    </div>
+    <div class="islands-grid2">
+      <div class="isle reveal" style="--isle-g:rgba(167,139,250,.2);" onclick="isleClick(this,'Learning Nebula — Where knowledge becomes light. Lectures, labs, and those 3AM study sessions that change everything.')">
+        <span class="isle-icon" style="animation-delay:0s">📚</span>
+        <div class="isle-title">The Learning Nebula</div>
+        <div class="isle-desc">Where knowledge becomes light. Lectures, labs, and the 3AM study sessions that change everything.</div>
+        <span class="isle-tag">ACADEMICS</span>
+      </div>
+      <div class="isle reveal reveal-d1" style="--isle-g:rgba(245,200,66,.15);" onclick="isleClick(this,'Innovation Pulsar — Hackathons, projects, and ideas that keep you up past midnight. Building tomorrow, today.')">
+        <span class="isle-icon" style="animation-delay:.3s">💡</span>
+        <div class="isle-title">Innovation Pulsar</div>
+        <div class="isle-desc">Hackathons, passion projects, and ideas that keep you up past midnight. Building tomorrow, today.</div>
+        <span class="isle-tag">INNOVATION</span>
+      </div>
+      <div class="isle reveal reveal-d2" style="--isle-g:rgba(244,114,182,.15);" onclick="isleClick(this,'Friendship Galaxy — The bonds forged over shared deadlines and canteen food. These stars shine the longest.')">
+        <span class="isle-icon" style="animation-delay:.6s">🤝</span>
+        <div class="isle-title">Friendship Galaxy</div>
+        <div class="isle-desc">The bonds forged over canteen food and coding deadlines. These stars shine longest of all.</div>
+        <span class="isle-tag">CONNECTIONS</span>
+      </div>
+      <div class="isle reveal reveal-d1" style="--isle-g:rgba(103,232,249,.12);" onclick="isleClick(this,'Cultural Supernova — Fests, performances, and moments where your hidden talents finally explode.')">
+        <span class="isle-icon" style="animation-delay:.9s">🎭</span>
+        <div class="isle-title">Cultural Supernova</div>
+        <div class="isle-desc">Fests, performances, and moments where your hidden talents finally explode into the universe.</div>
+        <span class="isle-tag">CULTURE</span>
+      </div>
+      <div class="isle reveal reveal-d2" style="--isle-g:rgba(167,139,250,.2);" onclick="isleClick(this,'Victory Quasar — Every placement win, every project submitted, every small triumph forms your constellation.')">
+        <span class="isle-icon" style="animation-delay:1.2s">🏆</span>
+        <div class="isle-title">Victory Quasar</div>
+        <div class="isle-desc">Every placement win, every project, every small triumph that forms your personal constellation.</div>
+        <span class="isle-tag">ACHIEVEMENTS</span>
+      </div>
+      <div class="isle reveal reveal-d3" style="--isle-g:rgba(74,222,128,.12);" onclick="isleClick(this,'Sports Comet — The field where stress becomes speed. Because code is not everything.')">
+        <span class="isle-icon" style="animation-delay:1.5s">⚽</span>
+        <div class="isle-title">Sports Comet</div>
+        <div class="isle-desc">The field where stress becomes speed. Sports, recreation — because code isn't everything.</div>
+        <span class="isle-tag">SPORTS</span>
+      </div>
+      <div class="isle reveal reveal-d2" style="--isle-g:rgba(244,114,182,.15);grid-column:span 1;" onclick="isleClick(this,'Growth Star — Personal development, mental health, and becoming the best version of yourself.')">
+        <span class="isle-icon" style="animation-delay:1.8s">🌱</span>
+        <div class="isle-title">Growth Star</div>
+        <div class="isle-desc">Personal development, mental health, becoming the best version of yourself — your brightest star.</div>
+        <span class="isle-tag">GROWTH</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ISLAND DETAIL POPUP -->
+<div id="isle-popup" style="
+  position:fixed;inset:0;z-index:500;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(3,3,14,.85);backdrop-filter:blur(16px);
+" onclick="closeIsle()">
+  <div style="
+    background:rgba(13,8,32,.95);border:1px solid rgba(167,139,250,.3);
+    border-radius:24px;padding:3rem;max-width:480px;text-align:center;
+    position:relative;
+  " onclick="event.stopPropagation()">
+    <div id="isle-popup-text" style="font-size:1.1rem;color:var(--white);line-height:1.7;margin-bottom:1.5rem;font-family:'Syne',sans-serif;font-weight:700;"></div>
+    <button onclick="closeIsle()" class="btn-p" style="font-size:.82rem;padding:.7rem 1.8rem;">Back to Universe</button>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- INTERACTIVE CONSTELLATION FORGE              -->
+<!-- ============================================ -->
+<div id="constellation-draw" style="position:relative;z-index:1;padding:5rem 0 6rem;">
+
+  <!-- Header -->
+  <div style="text-align:center;padding:0 2rem 3rem;">
+    <div class="div-line"><span>✦</span></div>
+    <span class="chapter-tag">Interactive · Forge Your Constellation</span>
+    <h2 class="ch-title" style="margin:.5rem 0 .5rem;font-size:clamp(2rem,4vw,3rem);">
+      Build Your Universe
+    </h2>
+    <p style="color:var(--muted);max-width:540px;margin:.5rem auto 0;font-size:.9rem;line-height:1.7;">
+      Every star you place is a memory. Name it. Connect them. Watch your personal constellation come alive — glowing, pulsing, yours forever.
+    </p>
+  </div>
+
+  <!-- Mode + Tool Bar -->
+  <div id="forge-toolbar" style="
+    display:flex;align-items:center;justify-content:center;
+    gap:.5rem;flex-wrap:wrap;padding:0 1rem 1.2rem;
+  ">
+    <div style="
+      display:flex;background:rgba(255,255,255,.03);
+      border:1px solid rgba(167,139,250,.18);border-radius:12px;
+      padding:.3rem;gap:.3rem;
+    ">
+      <button class="forge-tool active" id="tool-place" onclick="setTool('place')" title="Place stars">
+        ✦ Place Star
+      </button>
+      <button class="forge-tool" id="tool-name" onclick="setTool('name')" title="Name a star">
+        ✏️ Name
+      </button>
+      <button class="forge-tool" id="tool-link" onclick="setTool('link')" title="Draw link">
+        🔗 Link
+      </button>
+      <button class="forge-tool" id="tool-erase" onclick="setTool('erase')" title="Erase star">
+        🗑 Erase
+      </button>
+    </div>
+
+    <!-- Color picker -->
+    <div style="display:flex;gap:.4rem;align-items:center;">
+      <span style="font-size:.7rem;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:.08em;">COLOR</span>
+      <div class="color-swatch active" style="background:#f5c842;" onclick="setColor('#f5c842',this)" title="Gold"></div>
+      <div class="color-swatch" style="background:#a78bfa;" onclick="setColor('#a78bfa',this)" title="Violet"></div>
+      <div class="color-swatch" style="background:#f472b6;" onclick="setColor('#f472b6',this)" title="Rose"></div>
+      <div class="color-swatch" style="background:#67e8f9;" onclick="setColor('#67e8f9',this)" title="Cyan"></div>
+      <div class="color-swatch" style="background:#4ade80;" onclick="setColor('#4ade80',this)" title="Green"></div>
+      <div class="color-swatch" style="background:#fb923c;" onclick="setColor('#fb923c',this)" title="Orange"></div>
+    </div>
+
+    <!-- Size -->
+    <div style="display:flex;gap:.4rem;align-items:center;">
+      <span style="font-size:.7rem;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:.08em;">SIZE</span>
+      <button class="forge-tool" onclick="setSize('sm')">S</button>
+      <button class="forge-tool active" onclick="setSize('md')">M</button>
+      <button class="forge-tool" onclick="setSize('lg')">L</button>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div style="
+    display:flex;align-items:center;justify-content:center;
+    gap:.5rem;flex-wrap:wrap;padding:0 1rem 1rem;
+  ">
+    <button class="forge-action" onclick="autoMemories()">🌌 Auto-Generate Memories</button>
+    <button class="forge-action" onclick="forgeNameAll()">✨ Name All Stars</button>
+    <button class="forge-action" onclick="forgeExplode()">💥 Supernova Burst</button>
+    <button class="forge-action" onclick="forgeDownload()">⬇ Save My Universe</button>
+    <button class="forge-action danger" onclick="forgeClear()">✕ Clear</button>
+  </div>
+
+  <!-- MAIN CANVAS -->
+  <div style="position:relative;max-width:1000px;margin:0 auto;padding:0 1rem;">
+    <!-- Hint overlay (shown until first click) -->
+    <div id="forge-hint" style="
+      position:absolute;inset:0;z-index:10;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      pointer-events:none;
+      transition:opacity .6s;
+    ">
+      <div style="
+        border:1px dashed rgba(167,139,250,.3);
+        border-radius:20px;padding:2rem 3rem;
+        text-align:center;background:rgba(3,3,14,.3);
+        backdrop-filter:blur(4px);
+      ">
+        <div style="font-size:2.5rem;margin-bottom:.8rem;">✦</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--white);margin-bottom:.4rem;">
+          Click anywhere to place your first star
+        </div>
+        <div style="font-size:.8rem;color:var(--muted);">Each star is a memory. Together they form <em>your</em> constellation.</div>
+      </div>
+    </div>
+
+    <canvas id="const-canvas"
+      style="display:block;width:100%;border-radius:20px;
+             border:1px solid rgba(167,139,250,.15);
+             background:rgba(3,3,14,.6);cursor:crosshair;
+             box-shadow:0 0 60px rgba(167,139,250,.06);"
+    ></canvas>
+  </div>
+
+  <!-- Status bar -->
+  <div style="
+    text-align:center;margin-top:1.2rem;
+    font-family:'Space Mono',monospace;font-size:.72rem;
+    color:var(--muted);letter-spacing:.1em;
+    display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;
+  ">
+    <span>⭐ <span id="sc-stars">0</span> STARS</span>
+    <span>🔗 <span id="sc-links">0</span> LINKS</span>
+    <span>✏️ <span id="sc-named">0</span> NAMED</span>
+    <span id="sc-tool-hint" style="color:var(--violet);">TOOL: PLACE STAR</span>
+  </div>
+
+  <!-- Name modal -->
+  <div id="name-modal" style="
+    display:none;position:fixed;inset:0;z-index:600;
+    align-items:center;justify-content:center;
+    background:rgba(3,3,14,.8);backdrop-filter:blur(12px);
+  ">
+    <div style="
+      background:rgba(13,8,32,.98);border:1px solid rgba(167,139,250,.35);
+      border-radius:20px;padding:2.5rem;max-width:380px;width:90%;
+      text-align:center;
+    ">
+      <div style="font-size:2rem;margin-bottom:.5rem;" id="name-modal-star">✦</div>
+      <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:.3rem;">Name This Memory</h3>
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1.2rem;">What does this star represent in your campus journey?</p>
+      <input id="star-name-input"
+        placeholder="e.g. First hackathon win, 3AM debugging session..."
+        style="
+          width:100%;background:rgba(167,139,250,.07);
+          border:1px solid rgba(167,139,250,.25);border-radius:10px;
+          color:var(--white);font-family:'Space Grotesk',sans-serif;
+          font-size:.88rem;padding:.8rem 1rem;outline:none;
+          transition:border-color .2s;margin-bottom:1.2rem;
+        "
+        onkeydown="if(event.key==='Enter')confirmName()"
+      />
+      <!-- Preset memory tags -->
+      <div style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:1.2rem;">
+        <span class="mem-tag" onclick="pickPreset(this)">First day</span>
+        <span class="mem-tag" onclick="pickPreset(this)">Hackathon</span>
+        <span class="mem-tag" onclick="pickPreset(this)">3AM coding</span>
+        <span class="mem-tag" onclick="pickPreset(this)">Best friend</span>
+        <span class="mem-tag" onclick="pickPreset(this)">Project submission</span>
+        <span class="mem-tag" onclick="pickPreset(this)">Canteen gossip</span>
+        <span class="mem-tag" onclick="pickPreset(this)">WiFi rage</span>
+        <span class="mem-tag" onclick="pickPreset(this)">Placement day</span>
+        <span class="mem-tag" onclick="pickPreset(this)">Cultural fest</span>
+        <span class="mem-tag" onclick="pickPreset(this)">First internship</span>
+      </div>
+      <div style="display:flex;gap:.8rem;justify-content:center;">
+        <button class="btn-p" onclick="confirmName()" style="font-size:.82rem;padding:.7rem 1.6rem;">Seal the Memory ✦</button>
+        <button class="btn-g" onclick="closeNameModal()" style="font-size:.82rem;padding:.7rem 1.2rem;">Skip</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+/* ---- Forge toolbar styles ---- */
+.forge-tool{
+  background:transparent;border:none;
+  color:var(--muted);font-family:'Space Mono',monospace;
+  font-size:.7rem;letter-spacing:.06em;
+  padding:.45rem .9rem;border-radius:8px;cursor:pointer;
+  transition:background .2s,color .2s;white-space:nowrap;
+}
+.forge-tool:hover{background:rgba(167,139,250,.12);color:var(--white);}
+.forge-tool.active{background:rgba(167,139,250,.18);color:var(--violet);}
+.forge-action{
+  background:rgba(167,139,250,.07);
+  border:1px solid rgba(167,139,250,.2);
+  color:var(--violet);font-family:'Space Mono',monospace;
+  font-size:.68rem;letter-spacing:.06em;
+  padding:.42rem 1rem;border-radius:999px;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.forge-action:hover{background:rgba(167,139,250,.15);border-color:var(--violet);color:var(--white);transform:translateY(-2px);}
+.forge-action.danger{color:var(--rose);border-color:rgba(244,114,182,.25);background:rgba(244,114,182,.05);}
+.forge-action.danger:hover{background:rgba(244,114,182,.12);border-color:var(--rose);}
+.color-swatch{
+  width:22px;height:22px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform .2s,border-color .2s;
+}
+.color-swatch:hover{transform:scale(1.2);}
+.color-swatch.active{border-color:white;transform:scale(1.15);}
+.mem-tag{
+  font-size:.7rem;color:var(--muted);
+  border:1px solid rgba(167,139,250,.2);
+  padding:.22rem .65rem;border-radius:999px;cursor:pointer;
+  transition:all .2s;font-family:'Space Mono',monospace;
+}
+.mem-tag:hover{color:var(--violet);border-color:var(--violet);background:rgba(167,139,250,.07);}
+#star-name-input:focus{border-color:rgba(167,139,250,.5);box-shadow:0 0 0 3px rgba(167,139,250,.1);}
+</style>
+
+<!-- STORY DIVIDER 3 -->
+<div class="story-divider" id="sd3">
+  <p class="story-text" id="st3">
+    You had something to say.<br>
+    About who you are. What you stand for.<br>
+    And yes — about <span class="rose">the WiFi</span>.<br>
+    <span class="accent">So we made a poster.</span>
+  </p>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 4: POSTER             -->
+<!-- ============================= -->
+<section id="ch4" class="chapter" style="display:block;padding:8rem 2rem;">
+  <div class="poster-wrap">
+    <div class="reveal">
+      <span class="chapter-tag">Chapter 03 · The Declaration</span>
+      <h2 class="ch-title reveal-d1" style="margin:.5rem 0 1rem;">A Poster That<br>Speaks the Truth</h2>
+      <p class="ch-body reveal-d2">Bold, modern, and deeply relatable — our campus awareness poster speaks what every student feels but rarely says out loud.</p>
+      <div class="prompt-reveal reveal-d3">
+        <strong>✦ Lyria Image Gen Prompt:</strong><br>
+        Futuristic A3 portrait poster, confident engineering student with books + laptop, deep cosmic space background, constellation lines, gold-violet-rose palette, floating campus islands, cinematic lighting, professional event poster quality, inspirational + humorous
+      </div>
+    </div>
+    <div class="poster-frame reveal reveal-d2">
+      <img id="poster-image" src="poster.jpeg" alt="Campus Constellation poster"
+        style="display:block;width:100%;height:auto;max-height:80vh;border-radius:20px;object-fit:contain;box-shadow:0 22px 70px rgba(0,0,0,.35);" />
+    </div>
+  </div>
+</section>
+
+<!-- STORY DIVIDER 4 -->
+<div class="story-divider" id="sd4">
+  <p class="story-text" id="st4">
+    Every constellation needs a <span class="accent">sound</span>.<br>
+    A rhythm that plays while you sprint to submit assignments at 11:58PM.<br>
+    <span class="violet">This is our anthem.</span>
+  </p>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 5: ANTHEM             -->
+<!-- ============================= -->
+<section id="ch5" class="chapter" style="display:block;padding:8rem 2rem;">
+  <div class="music-wrap">
+    <div class="div-line"><span>✦</span></div>
+    <span class="chapter-tag reveal">Chapter 04 · The Anthem</span>
+    <h2 class="ch-title reveal reveal-d1" style="text-align:center;margin:.5rem 0 .5rem;">Our Campus Song</h2>
+    <p style="color:var(--muted);text-align:center;font-size:.88rem;margin-bottom:2.5rem;" class="reveal reveal-d2">Pop Rock × Electronic × Student Soul — this is who we are.</p>
+
+    <div class="vinyl-wrap reveal reveal-d2">
+      <div class="vinyl-glow" id="vinyl-glow"></div>
+      <div class="vinyl" id="vinyl"></div>
+    </div>
+
+    <div class="player-card reveal reveal-d3" style="margin-top:2rem;">
+      <audio id="anthem-audio" src="anthem.mp3" preload="metadata"></audio>
+      <div class="track-name">Campus Constellation</div>
+      <div class="track-art">Upbeat Indie Pop-Rock / Electronic · 128 BPM · Punchy drums, synth, electric guitar · Energetic female vocals</div>
+      <div class="lyrics-box" id="lyrics">
+        <span class="hl">(Verse 1)</span><br>
+        Kaalai class-u tension-aa irundhalum,<br>
+        Late night code adichu tired-aa ponaalum,<br>
+        Every friendship-u oru minnum star-u,<br>
+        Namma dream-sum appadiye fly pannum!<br><br>
+        <span class="hl">(Chorus)</span><br>
+        Campus Constellation-la onnaga sendhu,<br>
+        Namma shine pannuvom forever-u!<br>
+        Campus Constellation-la onnaga sendhu,<br>
+        Namma shine pannuvom forever-u!
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-bar" onclick="seekTrack(event)">
+          <div class="prog-fill" id="prog"></div>
+        </div>
+        <div class="time-row"><span id="cur-t">0:00</span><span>3:24</span></div>
+      </div>
+      <div class="ctrl-row">
+        <button class="ctrl-btn" onclick="skipTrack(-15)">⏮</button>
+        <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+        <button class="ctrl-btn" onclick="skipTrack(15)">⏭</button>
+      </div>
+      <div class="lyria-note">
+        <strong>✦ Generate with Lyria:</strong> energetic college anthem, pop rock + electronic, 128BPM, G major, student crowd chants, festival vibe, radio quality, Imagine Dragons × COIN style
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY DIVIDER 5 -->
+<div class="story-divider" id="sd5">
+  <p class="story-text" id="st5">
+    But we wouldn't be honest if we didn't talk about<br>
+    <span class="rose">the things that drive us absolutely crazy.</span><br>
+    <span class="accent">Campus has some explaining to do.</span>
+  </p>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 6: CAMPUS BEEFS       -->
+<!-- ============================= -->
+<section id="ch6" class="chapter" style="display:block;padding:8rem 2rem;">
+  <div class="beefs-wrap">
+    <div class="div-line"><span>✦</span></div>
+    <span class="chapter-tag reveal">Chapter 05 · The Beefs</span>
+    <h2 class="ch-title reveal reveal-d1">Campus, We Need<br>To Talk</h2>
+    <p style="color:var(--muted);max-width:500px;font-size:.9rem;margin-bottom:3rem;" class="reveal reveal-d2">Vote for the campus issues that keep you up at night. (Besides the assignments.)</p>
+    <div class="beefs-grid">
+      <div class="beef reveal" onclick="">
+        <span class="beef-icon2">📶</span>
+        <div class="beef-title2">WiFi That Actually Works</div>
+        <div class="beef-desc2">Drops exactly when you hit Submit. We've timed it. This is not a coincidence.</div>
+        <div class="vote-r"><button class="vote-b" onclick="vote(this,event)">⭐ Relate</button><span class="vote-cnt">2.4k stars</span></div>
+      </div>
+      <div class="beef reveal reveal-d1">
+        <span class="beef-icon2">⏰</span>
+        <div class="beef-title2">8AM Lectures</div>
+        <div class="beef-desc2">Who decided humans should learn calculus at 8AM? We have questions. And complaints.</div>
+        <div class="vote-r"><button class="vote-b" onclick="vote(this,event)">⭐ Relate</button><span class="vote-cnt">3.1k stars</span></div>
+      </div>
+      <div class="beef reveal reveal-d2">
+        <span class="beef-icon2">🍱</span>
+        <div class="beef-title2">Canteen Queue Physics</div>
+        <div class="beef-desc2">Expands to fill all available time. Einsteinian in scope. Unacceptable in practice.</div>
+        <div class="vote-r"><button class="vote-b" onclick="vote(this,event)">⭐ Relate</button><span class="vote-cnt">1.9k stars</span></div>
+      </div>
+      <div class="beef reveal reveal-d1">
+        <span class="beef-icon2">😰</span>
+        <div class="beef-title2">Placement Season</div>
+        <div class="beef-desc2">Third year is basically a long anxiety dream with occasional DSA rounds. We need support.</div>
+        <div class="vote-r"><button class="vote-b" onclick="vote(this,event)">⭐ Relate</button><span class="vote-cnt">4.2k stars</span></div>
+      </div>
+      <div class="beef reveal reveal-d2">
+        <span class="beef-icon2">📝</span>
+        <div class="beef-title2">Assignment Avalanche</div>
+        <div class="beef-desc2">Five assignments in one week was not in the brochure. A word with the academic manager, please.</div>
+        <div class="vote-r"><button class="vote-b" onclick="vote(this,event)">⭐ Relate</button><span class="vote-cnt">2.8k stars</span></div>
+      </div>
+      <div class="beef reveal reveal-d3">
+        <span class="beef-icon2">🔌</span>
+        <div class="beef-title2">Zero Charging Points</div>
+        <div class="beef-desc2">12% battery, 2 hours of class, no outlet in sight. This is a humanitarian crisis.</div>
+        <div class="vote-r"><button class="vote-b" onclick="vote(this,event)">⭐ Relate</button><span class="vote-cnt">1.5k stars</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY DIVIDER 6 -->
+<div class="story-divider" id="sd6">
+  <p class="story-text" id="st6">
+    Behind every constellation is a team of <span class="accent">star-builders</span>.<br>
+    People who stayed up late, argued over fonts,<br>
+    and <span class="violet">made something extraordinary</span> out of ordinary college days.
+  </p>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 7: THE TEAM           -->
+<!-- ============================= -->
+<section id="ch7" class="chapter" style="display:block;padding:8rem 2rem;">
+  <div class="team-wrap">
+    <div class="div-line"><span>✦</span></div>
+    <span class="chapter-tag reveal">Chapter 06 · The Stars Behind This</span>
+    <h2 class="ch-title reveal reveal-d1" style="text-align:center;">Meet the Team</h2>
+    <p style="color:var(--muted);max-width:440px;margin:.5rem auto 0;font-size:.88rem;" class="reveal reveal-d2">Every constellation needs its founding stars.</p>
+    <div class="team-grid2">
+      <div class="tm reveal">
+        <div class="tm-av">🎼</div>
+        <div class="tm-name">Harigopika Chandrasekaran</div>
+        <div class="tm-role">Music Composer</div>
+        <div class="tm-quote">"Every idea is a star waiting to shine."</div>
+      </div>
+      <div class="tm reveal reveal-d1">
+        <div class="tm-av">🎨</div>
+        <div class="tm-name">DhivyaDharshini Vadivel</div>
+        <div class="tm-role">Poster Designer</div>
+        <div class="tm-quote">"Code is poetry for machines."</div>
+      </div>
+      <div class="tm reveal reveal-d2">
+        <div class="tm-av">💻</div>
+        <div class="tm-name">Athisaya Prabakaran</div>
+        <div class="tm-role">Web Architect</div>
+        <div class="tm-quote">"Sound is the universe's language."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY DIVIDER 7 -->
+<div class="story-divider" id="sd7">
+  <p class="story-text" id="st7">
+    And so the journey comes full circle.<br>
+    From a blank page student to a <span class="gold" style="color:var(--gold);">glowing constellation</span>.<br>
+    <span class="violet">Your story doesn't end here. It just found its name.</span>
+  </p>
+</div>
+
+<!-- ============================= -->
+<!-- CHAPTER 8: FINALE             -->
+<!-- ============================= -->
+<section id="ch8" class="chapter" style="display:block;padding:8rem 2rem 4rem;">
+  <div class="finale-wrap">
+    <div class="div-line"><span>✦</span></div>
+    <span style="font-size:4rem;display:block;margin-bottom:1.5rem;animation:float 4s ease-in-out infinite;" class="reveal">🌌</span>
+    <h2 class="finale-title reveal reveal-d1">
+      Join the<br><span>Constellation</span>
+    </h2>
+    <p class="finale-sub reveal reveal-d2">Your story is a star that's been waiting to shine. Connect with us and become part of the universe.</p>
+    <div class="contact-links reveal reveal-d3">
+      <a class="c-link">✦ Instagram</a>
+      <a class="c-link">✦ LinkedIn</a>
+      <a class="c-link">✦ Discord</a>
+      <a class="c-link" href="mailto:constellation@campus.edu">✦ Email Us</a>
+    </div>
+    <footer>
+      <span class="f-logo">✦ Campus Constellation</span>
+      <span>"Every memory is a star. Every student is a universe."</span>
+      <span>© 2025 · Built with starlight and caffeine</span>
+    </footer>
+  </div>
+</section>
+
+<script>
+// ==========================================
+// NEW STAR CROSSHAIR CURSOR + COMET TRAIL
+// ==========================================
+const cWrap = document.getElementById('cursor-wrap');
+const curSq  = document.getElementById('cur-sq');
+const curDot = document.getElementById('cur-dot');
+const curH   = document.getElementById('cur-h');
+const curV   = document.getElementById('cur-v');
+const trailC = document.getElementById('cur-trail');
+const trailX = trailC ? trailC.getContext('2d') : null;
+
+// Size trail canvas to viewport
+function resizeTrail(){
+  if(!trailC) return;
+  trailC.width  = window.innerWidth;
+  trailC.height = window.innerHeight;
+  trailC.style.width  = trailC.width  + 'px';
+  trailC.style.height = trailC.height + 'px';
+}
+resizeTrail();
+window.addEventListener('resize', resizeTrail);
+
+let curMX=window.innerWidth/2, curMY=window.innerHeight/2;
+let curLX=curMX, curLY=curMY; // lagged position for ring
+let curSqAngle = 0;           // spinning square angle
+const trailPts = [];          // {x,y,alpha,r}
+let lastTrailT = 0;
+
+document.addEventListener('mousemove', e=>{
+  curMX = e.clientX; curMY = e.clientY;
+});
+
+document.addEventListener('mousedown', ()=>{
+  document.body.classList.add('cur-click');
+  // burst particles from cursor
+  for(let i=0;i<8;i++){
+    const a=Math.random()*Math.PI*2, sp=1.5+Math.random()*3;
+    cParticles.push({
+      x:curMX,y:curMY,
+      vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+      alpha:1,r:1.5,color:currentColor||'#f5c842',
+      life:0,maxLife:20
+    });
+  }
+});
+document.addEventListener('mouseup', ()=>{
+  document.body.classList.remove('cur-click');
+  setTimeout(()=>document.body.classList.remove('cur-click'),120);
+});
+
+document.querySelectorAll('button,a,.isle,.beef,.tm,.stat-c,.chap-dot,.forge-tool,.forge-action,.color-swatch,.mem-tag,.vote-b').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('cur-hover'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
+});
+
+function animCursor(ts){
+  // Lag factor
+  const lag = .1;
+  curLX += (curMX - curLX) * .12;
+  curLY += (curMY - curLY) * .12;
+
+  // Move wrapper to mouse (instant dot + cross)
+  cWrap.style.transform = `translate(${curMX}px,${curMY}px)`;
+
+  // Spinning square follows lagged pos slightly offset
+  curSqAngle += .8;
+  curSq.style.transform = `translate(calc(-50% + ${(curLX-curMX)*.3}px), calc(-50% + ${(curLY-curMY)*.3}px)) rotate(${45+curSqAngle}deg)`;
+
+  // Trail points
+  if(ts - lastTrailT > 18){
+    lastTrailT = ts;
+    trailPts.push({x:curMX,y:curMY,alpha:.7,r:2.5});
+  }
+
+  // Draw trail
+  if(trailX){
+    trailX.clearRect(0,0,trailC.width,trailC.height);
+    for(let i=trailPts.length-1;i>=0;i--){
+      const p = trailPts[i];
+      p.alpha -= .055;
+      p.r    *= .93;
+      if(p.alpha<=0){ trailPts.splice(i,1); continue; }
+      const g = trailX.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*3);
+      g.addColorStop(0,`rgba(167,139,250,${p.alpha*.8})`);
+      g.addColorStop(.5,`rgba(245,200,66,${p.alpha*.3})`);
+      g.addColorStop(1,'transparent');
+      trailX.fillStyle = g;
+      trailX.beginPath();
+      trailX.arc(p.x,p.y,p.r*3,0,Math.PI*2);
+      trailX.fill();
+      // Core dot
+      trailX.fillStyle = `rgba(255,255,255,${p.alpha*.6})`;
+      trailX.beginPath();
+      trailX.arc(p.x,p.y,p.r*.5,0,Math.PI*2);
+      trailX.fill();
+    }
+  }
+  requestAnimationFrame(animCursor);
+}
+requestAnimationFrame(animCursor);
+
+// ==========================================
+// SCROLL PROGRESS
+// ==========================================
+window.addEventListener('scroll',()=>{
+  const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  document.getElementById('progress-bar').style.width=pct+'%';
+  updateChapterDots();
+  checkStoryDividers();
+  checkReveals();
+});
+
+// ==========================================
+// CHAPTER NAVIGATION
+// ==========================================
+const chapters=['ch1','ch2','ch3','ch4','ch5','ch6','ch7','ch8'];
+const dots=document.querySelectorAll('.chap-dot');
+function scrollToChap(id){
+  document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
+}
+function updateChapterDots(){
+  let active=0;
+  chapters.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el){
+      const r=el.getBoundingClientRect();
+      if(r.top<=window.innerHeight*.6) active=i;
+    }
+  });
+  dots.forEach((d,i)=>{
+    d.classList.toggle('active',i===active);
+  });
+}
+
+// ==========================================
+// STORY DIVIDER TEXT REVEAL
+// ==========================================
+function checkStoryDividers(){
+  for(let i=1;i<=7;i++){
+    const el=document.getElementById('st'+i);
+    if(el){
+      const r=el.getBoundingClientRect();
+      if(r.top<window.innerHeight*.75) el.classList.add('lit');
+    }
+  }
+}
+
+// ==========================================
+// SCROLL REVEAL
+// ==========================================
+function checkReveals(){
+  document.querySelectorAll('.reveal:not(.vis)').forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top<window.innerHeight*.88) el.classList.add('vis');
+  });
+}
+checkReveals();
+setTimeout(checkReveals,300);
+
+// ==========================================
+// ANIMATED COUNTER
+// ==========================================
+function animateCounter(el,end,duration=2000){
+  let start=0,step=end/60,interval=duration/60;
+  const timer=setInterval(()=>{
+    start+=step;
+    if(start>=end){start=end;clearInterval(timer);}
+    el.textContent=Math.floor(start).toLocaleString();
+  },interval);
+}
+const countObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      animateCounter(document.getElementById('cnt1'),2847);
+      countObserver.disconnect();
+    }
+  });
+});
+const cnt1=document.getElementById('cnt1');
+if(cnt1) countObserver.observe(cnt1);
+
+// ==========================================
+// ORBITING DOTS
+// ==========================================
+const planet=document.getElementById('planet');
+const orbitDots=[
+  {el:document.getElementById('od1'),r:1.0,speed:.008,phase:0},
+  {el:document.getElementById('od2'),r:.75,speed:.013,phase:2},
+  {el:document.getElementById('od3'),r:.55,speed:.018,phase:4}
+];
+function animateOrbits(t){
+  if(planet){
+    const rect=planet.getBoundingClientRect();
+    const pw=planet.offsetWidth;
+    orbitDots.forEach(od=>{
+      if(!od.el) return;
+      const a=od.phase+t*od.speed;
+      const rx=pw*.55*od.r;
+      const ry=pw*.22*od.r;
+      const x=Math.cos(a)*rx;
+      const y=Math.sin(a)*ry;
+      od.el.style.position='absolute';
+      od.el.style.left=(50+x/pw*100)+'%';
+      od.el.style.top=(50+y/pw*100)+'%';
+      od.el.style.transform='translate(-50%,-50%)';
+    });
+  }
+  requestAnimationFrame(animateOrbits);
+}
+animateOrbits(0);
+
+// ==========================================
+// SPACE CANVAS — FULL IMMERSIVE BACKGROUND
+// ==========================================
+const sc=document.getElementById('space-canvas');
+const sctx=sc.getContext('2d');
+let W,H,stars=[],nebulas=[],ships=[],shootings=[],warpMode=false,warpT=0;
+
+function resizeSC(){
+  W=sc.width=window.innerWidth;
+  H=sc.height=window.innerHeight;
+}
+resizeSC();
+window.addEventListener('resize',resizeSC);
+
+// Create stars
+function makeStars(){
+  stars=[];
+  for(let i=0;i<500;i++){
+    stars.push({
+      x:Math.random()*W, y:Math.random()*H,
+      r:Math.random()*1.8+.2,
+      speed:Math.random()*.4+.1,
+      alpha:Math.random()*.9+.1,
+      twinkleSpeed:Math.random()*.03+.005,
+      twinklePhase:Math.random()*Math.PI*2,
+      color:Math.random()>.9?'#f5c842':Math.random()>.8?'#a78bfa':Math.random()>.95?'#67e8f9':'#ffffff',
+      layer:Math.floor(Math.random()*3),
+    });
+  }
+}
+
+// Create nebulas
+function makeNebulas(){
+  nebulas=[];
+  const cols=['rgba(167,139,250,','rgba(244,114,182,','rgba(103,232,249,','rgba(245,200,66,'];
+  for(let i=0;i<6;i++){
+    nebulas.push({
+      x:Math.random()*W, y:Math.random()*H,
+      r:80+Math.random()*180,
+      col:cols[Math.floor(Math.random()*cols.length)],
+      alpha:Math.random()*.06+.02,
+      dx:(Math.random()-.5)*.12,
+      dy:(Math.random()-.5)*.08,
+      pulse:Math.random()*Math.PI*2,
+    });
+  }
+}
+
+// Create spaceships — diagonal trajectories
+function makeShips(){
+  ships=[];
+  for(let i=0;i<5;i++){
+    ships.push(newShip());
+  }
+}
+
+function newShip(){
+  // Pick a random edge to spawn from: 0=top, 1=right, 2=bottom, 3=left
+  const edge = Math.floor(Math.random()*4);
+  let sx, sy, angle;
+
+  if(edge===0){        // spawn top, travel toward bottom-ish
+    sx = Math.random()*W;
+    sy = -80;
+    angle = (Math.random()*.8+.1)*Math.PI; // 18°–162° (mostly downward)
+  } else if(edge===1){ // spawn right, travel toward left-ish
+    sx = W+80;
+    sy = Math.random()*H;
+    angle = Math.PI+(Math.random()*.6-.3); // ~180° ±30°
+  } else if(edge===2){ // spawn bottom, travel toward top-ish
+    sx = Math.random()*W;
+    sy = H+80;
+    angle = -(Math.random()*.8+.1)*Math.PI; // upward
+  } else {             // spawn left, travel toward right-ish
+    sx = -80;
+    sy = Math.random()*H;
+    angle = (Math.random()*.6-.3);          // ~0° ±30°
+  }
+
+  const spd = .5+Math.random()*.9;
+  return {
+    x: sx, y: sy,
+    vx: Math.cos(angle)*spd,
+    vy: Math.sin(angle)*spd,
+    angle,              // heading in radians (used to rotate the ship)
+    size: 5+Math.random()*7,
+    trail: [],
+    color: ['#a78bfa','#67e8f9','#f5c842','#f472b6','#4ade80'][Math.floor(Math.random()*5)],
+    type: Math.floor(Math.random()*3),
+    blinkPhase: Math.random()*Math.PI*2,
+    edge,
+  };
+}
+
+function isShipOffscreen(s){
+  const pad = 140;
+  return s.x < -pad || s.x > W+pad || s.y < -pad || s.y > H+pad;
+}
+
+function drawShip(ctx, s, t){
+  const {size, color, type, angle, blinkPhase} = s;
+
+  // ── Trail ──
+  s.trail.push({x:s.x, y:s.y});
+  if(s.trail.length > 38) s.trail.shift();
+  if(s.trail.length > 1){
+    for(let i=1;i<s.trail.length;i++){
+      const frac = i/s.trail.length;
+      ctx.beginPath();
+      ctx.moveTo(s.trail[i-1].x, s.trail[i-1].y);
+      ctx.lineTo(s.trail[i].x,   s.trail[i].y);
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = frac*.45;
+      ctx.lineWidth   = size*.28*frac;
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.save();
+  ctx.translate(s.x, s.y);
+  // Rotate to match direction of travel
+  ctx.rotate(angle);
+
+  // ── Engine exhaust glow (behind ship, i.e. negative-x in local space) ──
+  const eg = ctx.createRadialGradient(-size*.9,0,0,-size*.9,0,size*1.6);
+  eg.addColorStop(0, `rgba(103,232,249,.9)`);
+  eg.addColorStop(.4,`rgba(167,139,250,.4)`);
+  eg.addColorStop(1, 'transparent');
+  ctx.fillStyle = eg;
+  ctx.beginPath();
+  ctx.ellipse(-size*.9, 0, size*1.6, size*.38, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  if(type===0){
+    // ── Classic saucer ──
+    ctx.fillStyle = color;
+    ctx.shadowColor = color; ctx.shadowBlur = 12;
+    ctx.beginPath();
+    ctx.ellipse(0,0, size*1.5, size*.42, 0,0,Math.PI*2);
+    ctx.fill();
+    // Cockpit dome
+    ctx.fillStyle = 'rgba(255,255,255,.3)';
+    ctx.beginPath();
+    ctx.ellipse(0,-size*.05, size*.55, size*.28, 0,0,Math.PI*2);
+    ctx.fill();
+    // Blinking underbelly lights
+    for(let i=-1;i<=1;i++){
+      const blink = .4+.6*Math.sin(t*.07+blinkPhase+i*1.2);
+      ctx.fillStyle=`rgba(245,200,66,${blink})`;
+      ctx.shadowColor='#f5c842'; ctx.shadowBlur=8;
+      ctx.beginPath();
+      ctx.arc(i*size*.52, size*.38, 2,0,Math.PI*2);
+      ctx.fill();
+    }
+
+  } else if(type===1){
+    // ── Sleek rocket ──
+    ctx.shadowColor=color; ctx.shadowBlur=14;
+    // Fuselage
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(size*1.4, 0);
+    ctx.lineTo(-size*.45, -size*.32);
+    ctx.lineTo(-size*.85, 0);
+    ctx.lineTo(-size*.45,  size*.32);
+    ctx.closePath(); ctx.fill();
+    // Window
+    ctx.fillStyle='rgba(255,255,255,.28)';
+    ctx.beginPath();
+    ctx.ellipse(size*.35,0, size*.45, size*.18, 0,0,Math.PI*2);
+    ctx.fill();
+    // Wings
+    ctx.fillStyle = color+'99';
+    ctx.beginPath();
+    ctx.moveTo(-size*.25, -size*.28);
+    ctx.lineTo(-size*.9,  -size*.75);
+    ctx.lineTo(-size*.95, -size*.22);
+    ctx.closePath(); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(-size*.25,  size*.28);
+    ctx.lineTo(-size*.9,   size*.75);
+    ctx.lineTo(-size*.95,  size*.22);
+    ctx.closePath(); ctx.fill();
+    // Nose tip
+    ctx.fillStyle='rgba(255,255,255,.5)';
+    ctx.beginPath();
+    ctx.arc(size*1.4,0,2,0,Math.PI*2);
+    ctx.fill();
+
+  } else {
+    // ── X-Wing style fighter ──
+    ctx.shadowColor=color; ctx.shadowBlur=12;
+    // Main body
+    ctx.fillStyle=color;
+    ctx.beginPath();
+    ctx.moveTo(size*1.4, 0);
+    ctx.lineTo(-size*.55, -size*.22);
+    ctx.lineTo(-size*.85, 0);
+    ctx.lineTo(-size*.55,  size*.22);
+    ctx.closePath(); ctx.fill();
+    // 4 wings spread diagonally
+    const wings=[
+      [-.28,-.18,-.95,-.72],[-.28,-.18,-.82,-.28],
+      [-.28, .18,-.95, .72],[-.28, .18,-.82, .28],
+    ];
+    ctx.fillStyle = color+'77';
+    wings.forEach(([x1,y1,x2,y2])=>{
+      ctx.beginPath();
+      ctx.moveTo(size*x1,size*y1);
+      ctx.lineTo(size*x2,size*y2);
+      ctx.lineTo(size*(x2-.25),size*y2);
+      ctx.closePath(); ctx.fill();
+    });
+    // Engine glow ports
+    const blink=.4+.6*Math.sin(t*.09+blinkPhase);
+    ctx.fillStyle=`rgba(103,232,249,${blink})`;
+    ctx.shadowColor='#67e8f9'; ctx.shadowBlur=10;
+    ctx.beginPath(); ctx.arc(-size*.82, size*.15,2.5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-size*.82,-size*.15,2.5,0,Math.PI*2); ctx.fill();
+  }
+
+  ctx.restore();
+  ctx.globalAlpha=1;
+  ctx.shadowBlur=0;
+}
+
+// Shooting stars
+function spawnShooting(){
+  if(shootings.length<3 && Math.random()<.003){
+    const angle=(Math.random()*40+20)*(Math.PI/180);
+    shootings.push({
+      x:Math.random()*W*.8,y:0,
+      vx:Math.cos(angle)*14,vy:Math.sin(angle)*14,
+      len:120+Math.random()*100,
+      alpha:1,life:0,
+    });
+  }
+}
+
+let galaxyAngle=0;
+function drawGalaxy(ctx,t){
+  // Milky way band
+  const grd=ctx.createLinearGradient(0,H*.2,W,H*.8);
+  grd.addColorStop(0,'transparent');
+  grd.addColorStop(.3,'rgba(167,139,250,.025)');
+  grd.addColorStop(.5,'rgba(245,200,66,.015)');
+  grd.addColorStop(.7,'rgba(167,139,250,.025)');
+  grd.addColorStop(1,'transparent');
+  ctx.fillStyle=grd;
+  ctx.fillRect(0,0,W,H);
+
+  // Distant galaxy blob
+  const gx=W*.7,gy=H*.25;
+  const gi=ctx.createRadialGradient(gx,gy,0,gx,gy,60);
+  gi.addColorStop(0,'rgba(167,139,250,.06)');
+  gi.addColorStop(.5,'rgba(244,114,182,.03)');
+  gi.addColorStop(1,'transparent');
+  ctx.fillStyle=gi;
+  ctx.save();
+  ctx.translate(gx,gy);ctx.rotate(galaxyAngle);
+  ctx.scale(2.5,.8);
+  ctx.beginPath();ctx.arc(0,0,60,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+  galaxyAngle+=.00015;
+}
+
+let frameT=0;
+function animateSpace(){
+  sctx.clearRect(0,0,W,H);
+  frameT++;
+
+  // Background galaxy
+  drawGalaxy(sctx,frameT);
+
+  // Nebula blobs
+  nebulas.forEach(n=>{
+    n.x+=n.dx;n.y+=n.dy;
+    if(n.x<-n.r)n.x=W+n.r;if(n.x>W+n.r)n.x=-n.r;
+    if(n.y<-n.r)n.y=H+n.r;if(n.y>H+n.r)n.y=-n.r;
+    n.pulse+=.008;
+    const pa=n.alpha*(0.7+0.3*Math.sin(n.pulse));
+    const grad=sctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+    grad.addColorStop(0,n.col+pa+')');
+    grad.addColorStop(1,n.col+'0)');
+    sctx.fillStyle=grad;
+    sctx.beginPath();sctx.ellipse(n.x,n.y,n.r,n.r*.6,n.pulse*.1,0,Math.PI*2);
+    sctx.fill();
+  });
+
+  // Constellation background lines (scroll-based)
+  const scrollFrac=window.scrollY/Math.max(1,document.body.scrollHeight-H);
+  const connDist=scrollFrac>0.3?180:120;
+  sctx.strokeStyle='rgba(167,139,250,.06)';
+  sctx.lineWidth=.6;
+  for(let i=0;i<Math.min(stars.length,80);i++){
+    for(let j=i+1;j<Math.min(stars.length,80);j++){
+      const dx=stars[i].x-stars[j].x;
+      const dy=stars[i].y-stars[j].y;
+      if(Math.abs(dx)+Math.abs(dy)<connDist){
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<connDist){
+          sctx.globalAlpha=(1-d/connDist)*.08;
+          sctx.beginPath();
+          sctx.moveTo(stars[i].x,stars[i].y);
+          sctx.lineTo(stars[j].x,stars[j].y);
+          sctx.stroke();
+        }
+      }
+    }
+  }
+  sctx.globalAlpha=1;
+
+  // Stars
+  if(warpMode){
+    warpT++;
+    stars.forEach(s=>{
+      const cx=W/2,cy=H/2;
+      const dx=s.x-cx,dy=s.y-cy;
+      const d=Math.sqrt(dx*dx+dy*dy)||1;
+      const speed=warpT*.08+.5;
+      const stretch=speed*8;
+      sctx.strokeStyle=s.color;
+      sctx.globalAlpha=Math.min(1,s.alpha+.4);
+      sctx.lineWidth=s.r*.7;
+      sctx.beginPath();
+      sctx.moveTo(s.x,s.y);
+      sctx.lineTo(s.x+dx/d*stretch,s.y+dy/d*stretch);
+      sctx.stroke();
+      s.x+=dx/d*speed*.4;s.y+=dy/d*speed*.4;
+      if(s.x<0||s.x>W||s.y<0||s.y>H){
+        s.x=cx+(Math.random()-.5)*40;
+        s.y=cy+(Math.random()-.5)*40;
+      }
+    });
+    sctx.globalAlpha=1;
+  } else {
+    warpT=0;
+    stars.forEach(s=>{
+      const tw=.5+.5*Math.sin(frameT*s.twinkleSpeed+s.twinklePhase);
+      const layerParallax=s.layer*window.scrollY*.0004;
+      const ry=(s.y+layerParallax)%H;
+      sctx.globalAlpha=s.alpha*tw;
+      sctx.fillStyle=s.color;
+      sctx.beginPath();
+      sctx.arc(s.x,ry,s.r,0,Math.PI*2);
+      sctx.fill();
+      // Star cross sparkle for big stars
+      if(s.r>1.4 && tw>.8){
+        sctx.globalAlpha=.3*tw;
+        sctx.strokeStyle=s.color;
+        sctx.lineWidth=.5;
+        sctx.beginPath();
+        sctx.moveTo(s.x-s.r*3,ry);sctx.lineTo(s.x+s.r*3,ry);
+        sctx.moveTo(s.x,ry-s.r*3);sctx.lineTo(s.x,ry+s.r*3);
+        sctx.stroke();
+      }
+    });
+    sctx.globalAlpha=1;
+  }
+
+  // Shooting stars
+  spawnShooting();
+  shootings=shootings.filter(s=>{
+    s.x+=s.vx;s.y+=s.vy;s.life++;s.alpha=Math.max(0,1-s.life/40);
+    if(s.alpha<=0||s.y>H)return false;
+    const grad=sctx.createLinearGradient(s.x,s.y,s.x-s.vx*(s.len/14),s.y-s.vy*(s.len/14));
+    grad.addColorStop(0,`rgba(255,255,255,${s.alpha})`);
+    grad.addColorStop(.4,`rgba(167,139,250,${s.alpha*.5})`);
+    grad.addColorStop(1,'transparent');
+    sctx.strokeStyle=grad;
+    sctx.lineWidth=1.5;
+    sctx.beginPath();
+    sctx.moveTo(s.x,s.y);
+    sctx.lineTo(s.x-s.vx*s.len/14,s.y-s.vy*s.len/14);
+    sctx.stroke();
+    return true;
+  });
+
+  // Spaceships — diagonal movement
+  ships.forEach((s,idx)=>{
+    s.x += s.vx * (warpMode ? 5 : 1);
+    s.y += s.vy * (warpMode ? 5 : 1);
+    if(isShipOffscreen(s)){
+      ships[idx] = newShip();
+    } else {
+      drawShip(sctx, s, frameT);
+    }
+  });
+
+  requestAnimationFrame(animateSpace);
+}
+
+makeStars();makeNebulas();makeShips();
+animateSpace();
+
+// WARP SPEED
+function toggleWarp(){
+  warpMode=!warpMode;
+  const btn=document.getElementById('warp-btn');
+  btn.textContent=warpMode?'🛑 EXIT WARP':'🚀 WARP SPEED';
+  btn.classList.toggle('active',warpMode);
+}
+
+// =====================================================
+// CONSTELLATION FORGE — Full Interactive Engine
+// =====================================================
+const cc = document.getElementById('const-canvas');
+const cctx = cc.getContext('2d');
+
+// State
+let cStars = [], cLinks = [], cParticles = [];
+let currentTool = 'place';
+let currentColor = '#f5c842';
+let currentSize = 'md';
+let linkStart = null;      // index of star linking from
+let hoveredStar = null;    // index
+let forgeRAF = null;
+let forgeT = 0;
+let pendingNameIdx = null; // star waiting to be named
+
+const SIZES = { sm: 3.5, md: 5.5, lg: 8 };
+const PRESETS = [
+  "First day on campus","Late night hackathon","3AM debugging session",
+  "Best friend forever","Project submission rush","Canteen gossip session",
+  "WiFi rage moment","Placement day anxiety","Cultural fest performance",
+  "First internship","Exam all-nighter","Dorm room memories",
+  "Sports tournament","College farewell","First crush","Teacher's rant",
+  "Library study group","Rainy day campus","Missed lecture (again)","Graduation"
+];
+
+// Canvas sizing
+function resizeForge(){
+  const maxW = Math.min(1000, window.innerWidth - 40);
+  cc.width = maxW;
+  cc.height = Math.round(maxW * .46);
+  cc.style.width = maxW + 'px';
+  cc.style.height = cc.height + 'px';
+}
+resizeForge();
+window.addEventListener('resize', () => { resizeForge(); });
+
+// Hex to rgba helper
+function hexRgba(hex, a){
+  const r = parseInt(hex.slice(1,3),16),
+        g = parseInt(hex.slice(3,5),16),
+        b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+// Update status bar
+function forgeStatus(){
+  document.getElementById('sc-stars').textContent = cStars.length;
+  document.getElementById('sc-links').textContent = cLinks.length;
+  document.getElementById('sc-named').textContent = cStars.filter(s=>s.name).length;
+  const hints = {
+    place:'TOOL: PLACE STAR — click to plant a memory',
+    name:'TOOL: NAME STAR — click a star to label it',
+    link:'TOOL: LINK STARS — click two stars to connect them',
+    erase:'TOOL: ERASE — click a star to remove it'
+  };
+  document.getElementById('sc-tool-hint').textContent = hints[currentTool]||'';
+}
+
+// Find star under mouse
+function starAt(x, y){
+  for(let i = cStars.length-1; i>=0; i--){
+    const s = cStars[i];
+    const dx = x-s.x, dy = y-s.y;
+    if(Math.sqrt(dx*dx+dy*dy) < s.r + 10) return i;
+  }
+  return -1;
+}
+
+// Spawn birth particles
+function spawnParticles(x, y, color, count=10){
+  for(let i=0;i<count;i++){
+    const angle = Math.random()*Math.PI*2;
+    const speed = 1+Math.random()*3;
+    cParticles.push({
+      x, y,
+      vx: Math.cos(angle)*speed,
+      vy: Math.sin(angle)*speed,
+      alpha: 1, r: 1+Math.random()*2,
+      color, life: 0, maxLife: 30+Math.random()*20
+    });
+  }
+}
+
+// Canvas mouse events
+cc.addEventListener('click', e=>{
+  const rect = cc.getBoundingClientRect();
+  const scaleX = cc.width / rect.width;
+  const scaleY = cc.height / rect.height;
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+  const hit = starAt(x, y);
+
+  // Hide hint on first interaction
+  const hint = document.getElementById('forge-hint');
+  if(hint) hint.style.opacity = '0';
+
+  if(currentTool === 'place'){
+    if(hit >= 0) return; // don't stack
+    const s = {
+      x, y,
+      r: SIZES[currentSize],
+      color: currentColor,
+      alpha: 0,
+      name: '',
+      pulse: Math.random()*Math.PI*2,
+      twinkleSpeed: .04+Math.random()*.03,
+      birthT: forgeT,
+      vx: 0, vy: 0,
+    };
+    cStars.push(s);
+    spawnParticles(x, y, currentColor, 14);
+    pendingNameIdx = cStars.length - 1;
+    setTimeout(()=>openNameModal(pendingNameIdx), 350);
+
+  } else if(currentTool === 'name'){
+    if(hit >= 0) openNameModal(hit);
+
+  } else if(currentTool === 'link'){
+    if(hit < 0){ linkStart = null; return; }
+    if(linkStart === null){ linkStart = hit; return; }
+    if(linkStart === hit){ linkStart = null; return; }
+    // Avoid duplicate links
+    const exists = cLinks.some(l =>
+      (l.a===linkStart&&l.b===hit)||(l.a===hit&&l.b===linkStart));
+    if(!exists){
+      cLinks.push({ a: linkStart, b: hit, alpha: 0,
+        color: cStars[linkStart].color });
+      spawnParticles(
+        (cStars[linkStart].x + cStars[hit].x)/2,
+        (cStars[linkStart].y + cStars[hit].y)/2,
+        '#a78bfa', 6
+      );
+    }
+    linkStart = null;
+
+  } else if(currentTool === 'erase'){
+    if(hit < 0) return;
+    spawnParticles(cStars[hit].x, cStars[hit].y, '#f472b6', 16);
+    cLinks = cLinks.filter(l => l.a!==hit && l.b!==hit)
+      .map(l => ({...l,
+        a: l.a>hit?l.a-1:l.a,
+        b: l.b>hit?l.b-1:l.b
+      }));
+    cStars.splice(hit, 1);
+    if(linkStart===hit) linkStart=null;
+  }
+  forgeStatus();
+});
+
+cc.addEventListener('mousemove', e=>{
+  const rect = cc.getBoundingClientRect();
+  const scaleX = cc.width / rect.width;
+  const scaleY = cc.height / rect.height;
+  const x = (e.clientX-rect.left)*scaleX;
+  const y = (e.clientY-rect.top)*scaleY;
+  hoveredStar = starAt(x, y);
+  cc.style.cursor = hoveredStar>=0
+    ? (currentTool==='erase'?'not-allowed':'pointer')
+    : (currentTool==='place'?'crosshair':'default');
+});
+cc.addEventListener('mouseleave', ()=>{ hoveredStar=null; });
+
+// ---- MAIN FORGE DRAW LOOP ----
+function forgeFrame(){
+  forgeT++;
+  cctx.clearRect(0, 0, cc.width, cc.height);
+
+  // -- Background nebula shimmer --
+  const bx=cc.width*.5, by=cc.height*.4;
+  const bg=cctx.createRadialGradient(bx,by,0,bx,by,cc.width*.55);
+  bg.addColorStop(0,'rgba(167,139,250,.04)');
+  bg.addColorStop(.5,'rgba(244,114,182,.02)');
+  bg.addColorStop(1,'transparent');
+  cctx.fillStyle=bg; cctx.fillRect(0,0,cc.width,cc.height);
+
+  // -- Mini star dust --
+  if(forgeT%3===0 && Math.random()>.6){
+    cParticles.push({
+      x:Math.random()*cc.width, y:Math.random()*cc.height,
+      vx:0,vy:0,alpha:.5,r:.8,
+      color:['#ffffff','#a78bfa','#f5c842'][Math.floor(Math.random()*3)],
+      life:0,maxLife:60+Math.random()*60
+    });
+  }
+
+  // -- Draw links --
+  cLinks.forEach(lk=>{
+    lk.alpha = Math.min(1, lk.alpha+.04);
+    const sa=cStars[lk.a], sb=cStars[lk.b];
+    if(!sa||!sb) return;
+
+    // Animated dash offset
+    const dashOff = (forgeT*1.2)%24;
+
+    // Glowing line
+    const g=cctx.createLinearGradient(sa.x,sa.y,sb.x,sb.y);
+    g.addColorStop(0, hexRgba(sa.color, lk.alpha*.7));
+    g.addColorStop(.5, hexRgba('#ffffff', lk.alpha*.3));
+    g.addColorStop(1, hexRgba(sb.color, lk.alpha*.7));
+
+    // Outer glow
+    cctx.save();
+    cctx.globalAlpha = lk.alpha*.25;
+    cctx.strokeStyle = hexRgba(lk.color, 1);
+    cctx.lineWidth = 8;
+    cctx.shadowColor = lk.color;
+    cctx.shadowBlur = 12;
+    cctx.setLineDash([]);
+    cctx.beginPath();
+    cctx.moveTo(sa.x,sa.y); cctx.lineTo(sb.x,sb.y);
+    cctx.stroke();
+    cctx.restore();
+
+    // Core dashed line
+    cctx.save();
+    cctx.globalAlpha = lk.alpha;
+    cctx.strokeStyle = g;
+    cctx.lineWidth = 1.4;
+    cctx.setLineDash([8,6]);
+    cctx.lineDashOffset = -dashOff;
+    cctx.beginPath();
+    cctx.moveTo(sa.x,sa.y); cctx.lineTo(sb.x,sb.y);
+    cctx.stroke();
+    cctx.setLineDash([]);
+
+    // Traveling energy dot along line
+    const frac = ((forgeT*1.5)%100)/100;
+    const tx = sa.x+(sb.x-sa.x)*frac;
+    const ty = sa.y+(sb.y-sa.y)*frac;
+    cctx.globalAlpha = lk.alpha*.8;
+    cctx.fillStyle = '#ffffff';
+    cctx.shadowColor = lk.color;
+    cctx.shadowBlur = 8;
+    cctx.beginPath(); cctx.arc(tx,ty,2,0,Math.PI*2); cctx.fill();
+    cctx.restore();
+  });
+
+  // -- Link start indicator --
+  if(linkStart!==null && cStars[linkStart]){
+    const s=cStars[linkStart];
+    cctx.save();
+    cctx.globalAlpha=.5+.3*Math.sin(forgeT*.12);
+    cctx.strokeStyle=s.color;
+    cctx.lineWidth=2;
+    cctx.setLineDash([4,4]);
+    cctx.beginPath();
+    cctx.arc(s.x,s.y,s.r+8+4*Math.sin(forgeT*.1),0,Math.PI*2);
+    cctx.stroke();
+    cctx.setLineDash([]);
+    cctx.restore();
+  }
+
+  // -- Draw stars --
+  cStars.forEach((s,i)=>{
+    s.alpha = Math.min(1, s.alpha+.06);
+    const tw = .7+.3*Math.sin(forgeT*s.twinkleSpeed+s.pulse);
+    const isHov = i===hoveredStar;
+    const isLinkSrc = i===linkStart;
+    const scl = isHov ? 1.25 : 1;
+    const R = s.r * scl;
+
+    // Outer aura
+    const aura = cctx.createRadialGradient(s.x,s.y,0,s.x,s.y,R*9);
+    aura.addColorStop(0, hexRgba(s.color, .15*tw*s.alpha));
+    aura.addColorStop(.4, hexRgba(s.color, .06*tw*s.alpha));
+    aura.addColorStop(1,'transparent');
+    cctx.fillStyle=aura;
+    cctx.beginPath(); cctx.arc(s.x,s.y,R*9,0,Math.PI*2); cctx.fill();
+
+    // Mid glow ring (pulsing)
+    cctx.save();
+    cctx.globalAlpha = (.4+.3*Math.sin(forgeT*.08+s.pulse))*s.alpha;
+    cctx.strokeStyle = s.color;
+    cctx.lineWidth = 1;
+    cctx.shadowColor = s.color;
+    cctx.shadowBlur = 12;
+    cctx.beginPath(); cctx.arc(s.x,s.y,R*4,0,Math.PI*2); cctx.stroke();
+    cctx.restore();
+
+    // 4-point star sparkle
+    cctx.save();
+    cctx.globalAlpha = tw*s.alpha*.9;
+    cctx.strokeStyle = s.color;
+    cctx.lineWidth = .8;
+    cctx.shadowColor = s.color;
+    cctx.shadowBlur = 10;
+    const spkLen = R*5.5*tw;
+    cctx.beginPath();
+    cctx.moveTo(s.x-spkLen,s.y); cctx.lineTo(s.x+spkLen,s.y);
+    cctx.moveTo(s.x,s.y-spkLen); cctx.lineTo(s.x,s.y+spkLen);
+    // diagonal mini
+    cctx.moveTo(s.x-spkLen*.5,s.y-spkLen*.5); cctx.lineTo(s.x+spkLen*.5,s.y+spkLen*.5);
+    cctx.moveTo(s.x+spkLen*.5,s.y-spkLen*.5); cctx.lineTo(s.x-spkLen*.5,s.y+spkLen*.5);
+    cctx.stroke();
+    cctx.restore();
+
+    // Core bright dot
+    cctx.save();
+    cctx.globalAlpha = s.alpha;
+    const core=cctx.createRadialGradient(s.x,s.y,0,s.x,s.y,R);
+    core.addColorStop(0,'#ffffff');
+    core.addColorStop(.5,s.color);
+    core.addColorStop(1,hexRgba(s.color,.4));
+    cctx.fillStyle=core;
+    cctx.shadowColor=s.color;
+    cctx.shadowBlur=16;
+    cctx.beginPath(); cctx.arc(s.x,s.y,R,0,Math.PI*2); cctx.fill();
+    cctx.restore();
+
+    // Hover ring
+    if(isHov){
+      cctx.save();
+      cctx.globalAlpha=.7;
+      cctx.strokeStyle='#ffffff';
+      cctx.lineWidth=1.5;
+      cctx.setLineDash([3,3]);
+      cctx.beginPath(); cctx.arc(s.x,s.y,R+10,0,Math.PI*2); cctx.stroke();
+      cctx.setLineDash([]);
+      cctx.restore();
+    }
+
+    // Name tag
+    if(s.name){
+      cctx.save();
+      cctx.globalAlpha=s.alpha*.9;
+      const labelY=s.y-R-20;
+      const labelW=cctx.measureText(s.name).width+16;
+      // Pill background
+      cctx.fillStyle=hexRgba('#03030e',.85);
+      cctx.strokeStyle=hexRgba(s.color,.5);
+      cctx.lineWidth=1;
+      roundRect(cctx, s.x-labelW/2, labelY-10, labelW, 18, 9);
+      cctx.fill(); cctx.stroke();
+      // Text
+      cctx.fillStyle=s.color;
+      cctx.font='bold 9px "Space Mono",monospace';
+      cctx.textAlign='center';
+      cctx.textBaseline='middle';
+      cctx.fillText(s.name.length>22?s.name.slice(0,21)+'…':s.name, s.x, labelY);
+      cctx.restore();
+    }
+
+    // Index number (small, top-right of star)
+    cctx.save();
+    cctx.globalAlpha=.45*s.alpha;
+    cctx.fillStyle=s.color;
+    cctx.font=`${Math.max(8,R*.8+4)}px "Space Mono",monospace`;
+    cctx.textAlign='center';
+    cctx.textBaseline='middle';
+    cctx.fillText(i+1, s.x+R+6, s.y-R-4);
+    cctx.restore();
+  });
+
+  // -- Particles --
+  cParticles = cParticles.filter(p=>{
+    p.life++;
+    p.x+=p.vx; p.y+=p.vy;
+    p.vx*=.92; p.vy*=.92;
+    p.alpha=Math.max(0,1-p.life/p.maxLife);
+    if(p.alpha<=0) return false;
+    cctx.save();
+    cctx.globalAlpha=p.alpha;
+    cctx.fillStyle=p.color;
+    cctx.shadowColor=p.color;
+    cctx.shadowBlur=6;
+    cctx.beginPath(); cctx.arc(p.x,p.y,p.r,0,Math.PI*2); cctx.fill();
+    cctx.restore();
+    return true;
+  });
+
+  forgeRAF = requestAnimationFrame(forgeFrame);
+}
+
+// Rounded rect helper
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+forgeFrame();
+
+// ---- TOOL CONTROLS ----
+function setTool(t){
+  currentTool = t;
+  linkStart = null;
+  document.querySelectorAll('.forge-tool').forEach(b=>{
+    b.classList.toggle('active', b.id==='tool-'+t);
+  });
+  forgeStatus();
+}
+function setColor(c, el){
+  currentColor = c;
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+}
+function setSize(s){
+  currentSize = s;
+  document.querySelectorAll('[onclick^="setSize"]').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// ---- NAME MODAL ----
+function openNameModal(idx){
+  pendingNameIdx = idx;
+  const modal = document.getElementById('name-modal');
+  const input = document.getElementById('star-name-input');
+  const starEl = document.getElementById('name-modal-star');
+  if(cStars[idx]){
+    starEl.style.color = cStars[idx].color;
+    starEl.textContent = '✦ Star #'+(idx+1);
+    input.value = cStars[idx].name || '';
+    input.style.borderColor = hexRgba(cStars[idx].color,.4);
+  }
+  modal.style.display = 'flex';
+  setTimeout(()=>input.focus(),100);
+}
+function confirmName(){
+  const val = document.getElementById('star-name-input').value.trim();
+  if(pendingNameIdx !== null && cStars[pendingNameIdx]){
+    cStars[pendingNameIdx].name = val;
+  }
+  closeNameModal();
+  forgeStatus();
+}
+function closeNameModal(){
+  document.getElementById('name-modal').style.display='none';
+  pendingNameIdx = null;
+}
+function pickPreset(el){
+  document.getElementById('star-name-input').value = el.textContent;
+  document.getElementById('star-name-input').focus();
+}
+
+// ---- ACTION BUTTONS ----
+const MEMORY_NAMES=[
+  "First day 🌅","3AM hackathon 💻","Best friend ✨","Canteen gossip ☕",
+  "WiFi rage 📶","Placement anxiety 😰","Cultural fest 🎭","Lab session 🔬",
+  "Sports day ⚽","Assignment rush 📝","Library nights 📚","Dorm stories 🏠",
+  "Rainy campus 🌧","First internship 💼","Graduation dream 🎓","Late pizza 🍕",
+  "Study group 👥","Teacher's joke 😂","Missed bus 🚌","Campus crush 💫"
+];
+
+function autoMemories(){
+  forgeClear(true);
+  const n = 10+Math.floor(Math.random()*6);
+  const colors=['#f5c842','#a78bfa','#f472b6','#67e8f9','#4ade80','#fb923c'];
+  const usedNames = [...MEMORY_NAMES].sort(()=>Math.random()-.5);
+  const margin = 60;
+  for(let i=0;i<n;i++){
+    const attempts=20;
+    let x,y,ok;
+    for(let a=0;a<attempts;a++){
+      x=margin+Math.random()*(cc.width-margin*2);
+      y=margin+Math.random()*(cc.height-margin*2);
+      ok=cStars.every(s=>{
+        const dx=s.x-x,dy=s.y-y;
+        return Math.sqrt(dx*dx+dy*dy)>70;
+      });
+      if(ok) break;
+    }
+    cStars.push({
+      x,y,r:SIZES[['sm','md','lg'][Math.floor(Math.random()*3)]],
+      color:colors[Math.floor(Math.random()*colors.length)],
+      alpha:0,name:usedNames[i]||'',
+      pulse:Math.random()*Math.PI*2,
+      twinkleSpeed:.04+Math.random()*.03,
+      birthT:forgeT,vx:0,vy:0
+    });
+  }
+  // Auto-link nearby stars (minimum spanning feel)
+  for(let i=0;i<cStars.length;i++){
+    let closest=-1,minD=Infinity;
+    for(let j=0;j<cStars.length;j++){
+      if(i===j) continue;
+      const dx=cStars[i].x-cStars[j].x,dy=cStars[i].y-cStars[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<minD){minD=d;closest=j;}
+    }
+    if(closest>=0&&!cLinks.some(l=>(l.a===i&&l.b===closest)||(l.a===closest&&l.b===i))){
+      cLinks.push({a:i,b:closest,alpha:0,color:cStars[i].color});
+    }
+  }
+  // Add some extra cross-links
+  for(let i=0;i<cStars.length;i++){
+    for(let j=i+1;j<cStars.length;j++){
+      const dx=cStars[i].x-cStars[j].x,dy=cStars[i].y-cStars[j].y;
+      const d=Math.sqrt(dx*dx+dy*dy);
+      if(d<200&&Math.random()>.55&&!cLinks.some(l=>(l.a===i&&l.b===j)||(l.a===j&&l.b===i))){
+        cLinks.push({a:i,b:j,alpha:0,color:cStars[i].color});
+      }
+    }
+  }
+  document.getElementById('forge-hint').style.opacity='0';
+  forgeStatus();
+}
+
+function forgeNameAll(){
+  let idx=cStars.findIndex(s=>!s.name);
+  if(idx<0){alert('All stars are already named! ✨');return;}
+  const unusedPresets=MEMORY_NAMES.filter(n=>!cStars.some(s=>s.name===n));
+  cStars.forEach((s,i)=>{if(!s.name)s.name=unusedPresets[i]||MEMORY_NAMES[i%MEMORY_NAMES.length];});
+  forgeStatus();
+}
+
+function forgeExplode(){
+  if(cStars.length===0){autoMemories();return;}
+  // Supernova: scatter all stars outward then pull back
+  const cx=cc.width/2, cy=cc.height/2;
+  cStars.forEach(s=>{
+    const dx=s.x-cx,dy=s.y-cy;
+    const d=Math.sqrt(dx*dx+dy*dy)||1;
+    spawnParticles(s.x,s.y,s.color,20);
+    s.vx=(dx/d)*(8+Math.random()*6);
+    s.vy=(dy/d)*(8+Math.random()*6);
+  });
+  // Animate explosion
+  let expT=0;
+  const expInterval=setInterval(()=>{
+    expT++;
+    cStars.forEach(s=>{
+      s.x+=s.vx; s.y+=s.vy;
+      s.vx*=.85; s.vy*=.85;
+      // Clamp
+      if(s.x<s.r){s.x=s.r;s.vx*=-.5;}
+      if(s.x>cc.width-s.r){s.x=cc.width-s.r;s.vx*=-.5;}
+      if(s.y<s.r){s.y=s.r;s.vy*=-.5;}
+      if(s.y>cc.height-s.r){s.y=cc.height-s.r;s.vy*=-.5;}
+    });
+    if(expT>60) clearInterval(expInterval);
+  },16);
+}
+
+function forgeClear(silent=false){
+  cStars=[]; cLinks=[]; cParticles=[];
+  linkStart=null;
+  if(!silent) document.getElementById('forge-hint').style.opacity='1';
+  forgeStatus();
+}
+
+function forgeDownload(){
+  const dataURL=cc.toDataURL('image/png');
+  const a=document.createElement('a');
+  a.href=dataURL;
+  a.download='my-campus-constellation.png';
+  a.click();
+}
+
+// ==========================================
+// ISLAND CLICK POPUP
+// ==========================================
+function isleClick(el,msg){
+  const pop=document.getElementById('isle-popup');
+  document.getElementById('isle-popup-text').textContent=msg;
+  pop.style.display='flex';
+}
+function closeIsle(){document.getElementById('isle-popup').style.display='none';}
+
+// ==========================================
+// MUSIC PLAYER
+// ==========================================
+const audioEl = document.getElementById('anthem-audio');
+let playing=false, progVal=0, playerInterval;
+let totalSecs=204;
+let audioLoaded=false;
+if(audioEl){
+  audioEl.addEventListener('loadedmetadata', ()=>{
+    totalSecs = Math.round(audioEl.duration);
+    audioLoaded = true;
+    const endTime = document.querySelector('.time-row span:last-child');
+    if(endTime) endTime.textContent = `${Math.floor(totalSecs/60)}:${(totalSecs%60+'').padStart(2,'0')}`;
+  });
+  audioEl.addEventListener('timeupdate', ()=>{
+    if(totalSecs>0){
+      const s = Math.round(audioEl.currentTime);
+      progVal = s / totalSecs * 100;
+      document.getElementById('prog').style.width = progVal + '%';
+      document.getElementById('cur-t').textContent = Math.floor(s/60)+':'+(s%60+'').padStart(2,'0');
+    }
+  });
+  audioEl.addEventListener('ended', ()=>{
+    playing=false;
+    document.getElementById('play-btn').textContent='▶';
+    document.getElementById('vinyl').classList.remove('playing');
+    document.getElementById('vinyl-glow').classList.remove('playing');
+  });
+}
+function togglePlay(){
+  const btn=document.getElementById('play-btn');
+  const vin=document.getElementById('vinyl');
+  const glow=document.getElementById('vinyl-glow');
+  if(audioEl && audioLoaded){
+    if(audioEl.paused){
+      audioEl.play();
+      playing=true;
+    } else {
+      audioEl.pause();
+      playing=false;
+    }
+  } else {
+    playing = !playing;
+  }
+  btn.textContent = playing ? '⏸' : '▶';
+  vin.classList.toggle('playing',playing);
+  glow.classList.toggle('playing',playing);
+}
+function skipTrack(secs){
+  if(audioEl && audioLoaded){
+    audioEl.currentTime = Math.max(0, Math.min(audioEl.duration, audioEl.currentTime + secs));
+  } else {
+    progVal=Math.max(0,Math.min(100,progVal+(secs/totalSecs*100)));
+    document.getElementById('prog').style.width=progVal+'%';
+    const s=Math.round(progVal/100*totalSecs);
+    document.getElementById('cur-t').textContent=Math.floor(s/60)+':'+(s%60+'').padStart(2,'0');
+  }
+}
+function seekTrack(e){
+  const bar=e.currentTarget;
+  const r=bar.getBoundingClientRect();
+  if(audioEl && audioLoaded){
+    audioEl.currentTime = ((e.clientX-r.left)/r.width) * audioEl.duration;
+  } else {
+    progVal=(e.clientX-r.left)/r.width*100;
+    document.getElementById('prog').style.width=progVal+'%';
+    const s=Math.round(progVal/100*totalSecs);
+    document.getElementById('cur-t').textContent=Math.floor(s/60)+':'+(s%60+'').padStart(2,'0');
+  }
+}
+
+// ==========================================
+// VOTING
+// ==========================================
+function vote(btn,e){
+  e.stopPropagation();
+  if(btn.classList.contains('voted'))return;
+  btn.classList.add('voted');
+  btn.textContent='⭐ Starred!';
+  const cnt=btn.parentElement.querySelector('.vote-cnt');
+  const val=parseFloat(cnt.textContent)*1000+1;
+  cnt.textContent=(val/1000).toFixed(1)+'k stars';
+}
+
+// ==========================================
+// NAV HAMBURGER
+// ==========================================
+function toggleNav(){
+  const tog=document.getElementById('nav-toggle');
+  const links=document.getElementById('nav-links');
+  tog.classList.toggle('open');
+  links.classList.toggle('open');
+}
+function closeNav(){
+  document.getElementById('nav-toggle').classList.remove('open');
+  document.getElementById('nav-links').classList.remove('open');
+}
+// Close nav on outside click
+document.addEventListener('click',e=>{
+  const nav=document.getElementById('nav-links');
+  const tog=document.getElementById('nav-toggle');
+  if(nav&&tog&&!nav.contains(e.target)&&!tog.contains(e.target)){
+    closeNav();
+  }
+});
+
+// ==========================================
+// MOUSE PARALLAX ON PLANET SECTION
+// ==========================================
+document.addEventListener('mousemove',e=>{
+  const p=document.getElementById('planet');
+  if(!p)return;
+  const rx2=((e.clientX/window.innerWidth)-.5)*6;
+  const ry2=((e.clientY/window.innerHeight)-.5)*4;
+  p.style.boxShadow=`${-rx2*3}px ${-ry2*3}px 60px rgba(167,139,250,.15),inset 0 0 80px rgba(167,139,250,.05)`;
+});
+
+// Initial checks
+checkStoryDividers();
+updateChapterDots();
+</script>
+</body>
+</html>
